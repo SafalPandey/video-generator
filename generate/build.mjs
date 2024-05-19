@@ -9,7 +9,7 @@ import { promisify } from 'util';
 const execP = promisify(exec);
 
 const agents = [
-	'BARACK_OBAMA',
+	'KANYE_WEST',
 	'BEN_SHAPIRO',
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',

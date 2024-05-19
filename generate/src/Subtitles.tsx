@@ -100,6 +100,7 @@ export const PaginatedSubtitles: React.FC<{
 		// continueRender(handle);
 	}, [frame, linesPerPage, subtitlesLineHeight, subtitlesZoomMeasurerSize]);
 
+	// console.log(currentAndFollowingSentences)
 	const currentFrameSentences = currentAndFollowingSentences.filter((word) => {
 		return word.start < frame;
 	});

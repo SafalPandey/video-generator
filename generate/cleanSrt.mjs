@@ -1,12 +1,7 @@
-import { OpenAI } from 'openai';
 import dotenv from 'dotenv';
 import { writeFile } from 'fs/promises';
 
 dotenv.config();
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function generateCleanSrt(transcript, srt) {
 	const promises = [];
@@ -23,23 +18,66 @@ export async function generateCleanSrt(transcript, srt) {
 	}
 }
 
+
+function parseContent(element) {
+	return element['message']['content']
+}
+
+function parseResponse(element) {
+	return element['response']
+}
+
+
+async function extractResponseText(response) {
+	// Making a valid JSON array of objects from model output
+	const text = await response.text()
+	const textArr = text.split("\n")
+
+	const rawText = '[' + textArr.slice(0, textArr.length - 1).join(",") + ']'
+
+	const parser = !`${response.url}`.includes("generate") ? parseContent : parseResponse
+
+	let jsonValue = ''
+	try {
+		jsonValue = JSON.parse(rawText);
+	}
+	catch (e) {
+		console.log(rawText, e)
+		throw e;
+	}
+
+	return jsonValue.map(parser).join("")
+
+}
 async function cleanSrt(transcript, srt, i) {
-	const completion = await openai.chat.completions.create({
-		messages: [
-			{
-				role: 'system',
-				content: `The first item I will give you is the correct text, and the next will be the SRT generated from this text which is not totally accurate. Sometimes the srt files just doesn't have words so if this is the case add the missing words to the SRT file which are present in the transcript. Based on the accurate transcript, and the possibly inaccurate SRT file, return the SRT text corrected for inaccurate spelling and such. Make sure you keep the format and the times the same.
-                            
-                            transcript: 
-                            ${transcript}
-                            
-                            srt file text: 
-                            ${srt}`,
-			},
-		],
-		model: 'gpt-4-turbo',
+	const completion = await fetch('http://localhost:11434/api/chat', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: JSON.stringify({
+			messages: [
+				{
+					role: 'system',
+					content: `The first item I will give you is the correct text, and the next will be the SRT generated from this text which is not totally accurate. Sometimes the srt files just doesn't have words so if this is the case add the missing words to the SRT file which are present in the transcript. Based on the accurate transcript, and the possibly inaccurate SRT file, return the SRT text corrected for inaccurate spelling and such. Make sure you keep the format and the times the same. YOU MUST RETAIN THE FORMAT!
+	
+transcript: 
+${transcript}
+
+srt file text: 
+${srt}`,
+				},
+				{
+					role:'user',
+					content: "follow the system prompt accurately!"
+				}
+			],
+			model: 'llama3:8b-instruct-q8_0',
+		})
 	});
 
-	const content = completion.choices[0].message.content;
+
+	const content = await extractResponseText(completion);
+	;
 	return { content, i };
 }

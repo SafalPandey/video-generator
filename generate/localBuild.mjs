@@ -24,15 +24,15 @@ async function cleanupResources() {
 }
 
 const agents = [
-	'BARACK_OBAMA',
+	'KANYE_WEST',
 	'BEN_SHAPIRO',
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',
 	'DONALD_TRUMP',
 	'MARK_ZUCKERBERG',
 	'JOE_BIDEN',
-	'LIL_YACHTY',
-	// 'RICK_SANCHEZ',
+	'LIL_WAYNE',
+	'ANDREW_TATE',
 ];
 
 const local = true;
@@ -47,22 +47,22 @@ async function main() {
 	} while (agentAIndex === agentBIndex);
 
 	// CHANGE THIS VALUE FOR YOUR CHOICE OF AGENTS
-	const agentA = agents[0];
-	const agentB = agents[4];
+	const agentA = agents[2];
+	const agentB = agents[3];
 
 	// CHANGE THIS VALUE FOR A CUSTOM VIDEO TOPIC
-	const videoTopic = 'Proximal Policy Optimization';
+	// const videoTopic = 'Proximal Policy Optimization';
 	const aiGeneratedImages = true;
 	const fps = 60;
 	const duration = 1; //minute
 	//MINECRAFT or TRUCK or GTA
-	const background = 'TRUCK';
+	const background = 'MINECRAFT';
 	const music = 'NONE';
 	const cleanSrt = true;
 
 	await transcribeFunction(
 		local,
-		videoTopic ? videoTopic : randomTopic,
+		randomTopic,
 		agentA,
 		agentB,
 		aiGeneratedImages,

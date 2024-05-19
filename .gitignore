@@ -16,6 +16,7 @@ query.sql
 /out/
 .next/
 
+venv
 
 # production
 /build
@@ -59,3 +60,5 @@ generate/out/*
 generate/public/*
 .env
 bun.lockb
+
+generate/output.log

@@ -7,7 +7,7 @@ import {
 	videoFileName,
 	fps,
 } from './tmp/context';
-import { getAudioDuration } from '@remotion/media-utils';
+import { getAudioDurationInSeconds } from '@remotion/media-utils';
 
 const PROCESS_ID = 0;
 
@@ -47,11 +47,11 @@ export const RemotionRoot: React.FC = () => {
 							color: '#90EE90',
 							image: 'BEN_SHAPIRO.png',
 						},
-						BARACK_OBAMA: {
+						KANYE_WEST: {
 							color: '#A020F0',
 							image: 'BARACK_OBAMA.png',
 						},
-						RICK_SANCHEZ: {
+						ANDREW_TATE: {
 							color: '#b6def1',
 							image: 'RICK_SANCHEZ.png',
 						},
@@ -59,7 +59,7 @@ export const RemotionRoot: React.FC = () => {
 							color: '#b32134',
 							image: 'DONALD_TRUMP.png',
 						},
-						LIL_YACHTY: {
+						LIL_WAYNE: {
 							color: '#ff0000',
 							image: 'LIL_YACHTY.png',
 						},
@@ -87,7 +87,7 @@ export const RemotionRoot: React.FC = () => {
 				// Determine the length of the video based on the duration of the audio file
 				calculateMetadata={async ({ props }) => {
 					const duration =
-						(await getAudioDuration(staticFile(`audio-${PROCESS_ID}.mp3`))) + 3;
+						(await getAudioDurationInSeconds(staticFile(`audio-${PROCESS_ID}.mp3`))) + 3;
 					return {
 						durationInFrames: Math.ceil(duration * fps),
 						props,

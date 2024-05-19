@@ -36,6 +36,10 @@ const AgentDetailsSchema = z.record(
 );
 
 const srtTimeToSeconds = (srtTime: string) => {
+	if (!srtTime) {
+		return null
+	}
+
 	const [hours, minutes, secondsAndMillis] = srtTime.split(':');
 	const [seconds, milliseconds] = secondsAndMillis.split(',');
 	return (
@@ -51,7 +55,8 @@ const parseSRT = (
 	srtFileIndex: number
 ): SubtitleEntry[] => {
 	// Split content into subtitle blocks
-	const blocks = srtContent.split('\n\n');
+	const blocks = srtContent?.split('\n\n') || [];
+	// console.log({ srtContent, blocks })
 
 	// Extract timestamps and text from each block
 	return blocks
@@ -67,6 +72,10 @@ const parseSRT = (
 			const [startTime, endTime] = timeLine
 				.split(' --> ')
 				.map(srtTimeToSeconds);
+
+			if (startTime === null || endTime === null) {
+				return null;
+			}
 
 			// Combine all text lines into one text block
 			const textLines = lines.slice(2).join(' ');
@@ -122,14 +131,7 @@ const AudioViz: React.FC<{
 	waveLinesToDisplay: number;
 	mirrorWave: boolean;
 	audioSrc: string;
-}> = ({
-	numberOfSamples,
-	waveColor,
-	freqRangeStartIndex,
-	waveLinesToDisplay,
-	mirrorWave,
-	audioSrc,
-}) => {
+}> = ({ numberOfSamples, waveColor, freqRangeStartIndex, waveLinesToDisplay, mirrorWave, audioSrc, }) => {
 	const frame = useCurrentFrame();
 
 	const audioData = useAudioData(audioSrc);
@@ -150,7 +152,7 @@ const AudioViz: React.FC<{
 	const frequencyDataSubset = frequencyData.slice(
 		freqRangeStartIndex,
 		freqRangeStartIndex +
-			(mirrorWave ? Math.round(waveLinesToDisplay / 2) : waveLinesToDisplay)
+		(mirrorWave ? Math.round(waveLinesToDisplay / 2) : waveLinesToDisplay)
 	);
 
 	const frequencesToDisplay = mirrorWave
@@ -196,8 +198,15 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	const { durationInFrames, fps } = useVideoConfig();
 	const frame = useCurrentFrame();
 	const [subtitlesData, setSubtitlesData] = useState<SubtitleEntry[]>([]);
-	const [currentSubtitle, setCurrentSubtitle] = useState<SubtitleEntry | null>(
-		null
+	const [currentSubtitle, setCurrentSubtitle] = useState<SubtitleEntry>(
+		{
+			endTime: 0,
+			index: "0",
+			srt: "",
+			srtFileIndex: 0,
+			startTime: 0,
+			text: ""
+		}
 	);
 	const [handle] = useState<number | null>(null);
 	const [prevImageIdx, setPrevImageIdx] = useState<number>(0);
@@ -208,17 +217,15 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	useEffect(() => {
 		if (subtitlesData.length > 0) {
 			const currentTime = frame / fps;
-			const currentSubtitle = subtitlesData.find(
-				(subtitle) =>
-					currentTime >= subtitle.startTime && currentTime < subtitle.endTime
-			);
+			const prevSubtitle = subtitlesData[prevImageIdx]
 
-			if (currentSubtitle) {
-				setPrevImageIdx(currentSubtitle.srtFileIndex);
-				setCurrentSubtitle(currentSubtitle);
-				// Use the srtFileIndex to find the corresponding agent name
-				const agentInfo = subtitlesFileName[currentSubtitle.srtFileIndex];
-				setCurrentAgentName(agentInfo.name);
+			const validateCurrentSub = () => currentTime >= prevSubtitle.startTime && currentTime < prevSubtitle.endTime;
+
+			if (!validateCurrentSub()) {
+				const nextSubtitleFileName = subtitlesFileName[prevImageIdx + 1]
+				setCurrentSubtitle(subtitlesData[prevImageIdx + 1])
+				setPrevImageIdx(prevImageIdx + 1)
+				setCurrentAgentName(nextSubtitleFileName.name)
 			}
 		}
 	}, [frame, fps, subtitlesData, subtitlesFileName]);
@@ -227,11 +234,13 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	useEffect(() => {
 		const fetchSubtitlesData = async () => {
 			try {
+				// console.log("called fetchSubData", subtitlesFileName)
 				const data = await Promise.all(
 					subtitlesFileName.map(async ({ file }, index) => {
 						// Pass the index to parseSRT
 						const response = await fetch(file);
 						const text = await response.text();
+						// console.log(response, text, "asda", response.url)
 						return parseSRT(text, index);
 					})
 				);
@@ -252,7 +261,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 				(subtitle) =>
 					currentTime >= subtitle.startTime && currentTime < subtitle.endTime
 			);
-			setCurrentSubtitle(current || null);
+			setCurrentSubtitle(current || currentSubtitle);
 		}
 	}, [frame, fps, subtitlesData]);
 
@@ -305,9 +314,8 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 									width={200}
 									height={200}
 									className="z-30 transition-all rounded-full"
-									src={`https://images.smart.wtf/${
-										currentAgentName || initialAgentName
-									}.png`}
+									src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
+										}.png`}
 								/>
 
 								<div>
@@ -331,16 +339,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								src={staticFile(videoFileName)}
 							/>
 							<div
-								className="absolute flex flex-col items-center gap-2 opacity-[65%] z-30 bottom-12 right-12 text-white font-bold text-7xl"
-								style={{
-									textShadow: '4px 4px 0px #000000',
-									WebkitTextStroke: '2px black',
-								}}
-							>
-								brainrotjs
-								<br></br>.com 🧠
-							</div>
-							<div
 								style={{
 									lineHeight: `${subtitlesLineHeight}px`,
 									textShadow: '4px 4px 0px #000000',
@@ -359,14 +357,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 							</div>
 						</div>
 					</div>
-				</Sequence>
-				<Sequence from={durationInFrames - 3 * fps}>
-					<OffthreadVideo
-						startFrom={20}
-						muted
-						className={`absolute -left-[1px] -top-[1px] h-full w-[101%] object-cover z-50 `}
-						src={'https://images.smart.wtf/brainrot.mp4'}
-					/>
 				</Sequence>
 			</AbsoluteFill>
 		</div>

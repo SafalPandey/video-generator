@@ -49,7 +49,7 @@ export default function CreateVideo({
 }) {
   const user = useAuth();
 
-  const userDB = trpc.user.user.useQuery().data?.user;
+  const userDB: any = trpc.user.user.useQuery().data?.user;
 
   const videoStatus = trpc.user.videoStatus.useQuery();
 
@@ -57,14 +57,14 @@ export default function CreateVideo({
   const [agent, setAgent] = useState<
     {
       name:
-        | "JORDAN_PETERSON"
-        | "BEN_SHAPIRO"
-        | "JOE_ROGAN"
-        | "BARACK_OBAMA"
-        | "DONALD_TRUMP"
-        | "MARK_ZUCKERBERG"
-        | "LIL_YACHTY"
-        | "JOE_BIDEN";
+      | "JORDAN_PETERSON"
+      | "BEN_SHAPIRO"
+      | "JOE_ROGAN"
+      | "KANYE_WEST"
+      | "DONALD_TRUMP"
+      | "MARK_ZUCKERBERG"
+      | "LIL_WAYNE"
+      | "JOE_BIDEN";
       id: number;
     }[]
   >([]);
@@ -260,9 +260,8 @@ export default function CreateVideo({
               }}
             />
             <p
-              className={`${
-                invalidTopic ? "" : "hidden"
-              } text-sm text-destructive`}
+              className={`${invalidTopic ? "" : "hidden"
+                } text-sm text-destructive`}
             >
               Not a valid topic
             </p>
@@ -279,10 +278,9 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "DONALD_TRUMP")
-                    ? "border border-red-500"
-                    : ""
+                `${agent.some((a) => a.name === "DONALD_TRUMP")
+                  ? "border border-red-500"
+                  : ""
                 }`,
               )}
               onClick={() => {
@@ -308,11 +306,10 @@ export default function CreateVideo({
               }}
             >
               <Image
-                className={` absolute bottom-0 left-0 right-0 top-0 z-20   transition-all ${
-                  agent.some((a) => a.name === "DONALD_TRUMP")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={` absolute bottom-0 left-0 right-0 top-0 z-20   transition-all ${agent.some((a) => a.name === "DONALD_TRUMP")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -329,10 +326,9 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "JORDAN_PETERSON")
-                    ? "border border-blue"
-                    : ""
+                `${agent.some((a) => a.name === "JORDAN_PETERSON")
+                  ? "border border-blue"
+                  : ""
                 }`,
               )}
               onClick={() => {
@@ -361,11 +357,10 @@ export default function CreateVideo({
               }}
             >
               <Image
-                className={` absolute bottom-0 left-0 right-0 top-0 z-20   transition-all ${
-                  agent.some((a) => a.name === "JORDAN_PETERSON")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={` absolute bottom-0 left-0 right-0 top-0 z-20   transition-all ${agent.some((a) => a.name === "JORDAN_PETERSON")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -382,10 +377,9 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "BEN_SHAPIRO")
-                    ? "border border-mrburns"
-                    : ""
+                `${agent.some((a) => a.name === "BEN_SHAPIRO")
+                  ? "border border-mrburns"
+                  : ""
                 }`,
               )}
               onClick={() => {
@@ -411,11 +405,10 @@ export default function CreateVideo({
               }}
             >
               <Image
-                className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                  agent.some((a) => a.name === "BEN_SHAPIRO")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${agent.some((a) => a.name === "BEN_SHAPIRO")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -432,10 +425,9 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "JOE_ROGAN")
-                    ? "border border-bender"
-                    : ""
+                `${agent.some((a) => a.name === "JOE_ROGAN")
+                  ? "border border-bender"
+                  : ""
                 }`,
               )}
               onClick={() => {
@@ -461,11 +453,10 @@ export default function CreateVideo({
               }}
             >
               <Image
-                className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                  agent.some((a) => a.name === "JOE_ROGAN")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${agent.some((a) => a.name === "JOE_ROGAN")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -482,40 +473,38 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "BARACK_OBAMA")
-                    ? "border border-patrick"
-                    : ""
+                `${agent.some((a) => a.name === "KANYE_WEST")
+                  ? "border border-patrick"
+                  : ""
                 }`,
               )}
               onClick={() => {
                 if (
                   agent.length === 2 &&
-                  !agent.some((a) => a.name === "BARACK_OBAMA")
+                  !agent.some((a) => a.name === "KANYE_WEST")
                 ) {
                   return;
                 }
                 setAgent((currentAgents) => {
                   const isBarackObama = currentAgents.some(
-                    (agent) => agent.name === "BARACK_OBAMA",
+                    (agent) => agent.name === "KANYE_WEST",
                   );
 
                   if (isBarackObama) {
                     return currentAgents.filter(
-                      (agent) => agent.name !== "BARACK_OBAMA",
+                      (agent) => agent.name !== "KANYE_WEST",
                     );
                   } else {
-                    return [...currentAgents, { name: "BARACK_OBAMA", id: 4 }];
+                    return [...currentAgents, { name: "KANYE_WEST", id: 4 }];
                   }
                 });
               }}
             >
               <Image
-                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${
-                  agent.some((a) => a.name === "BARACK_OBAMA")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${agent.some((a) => a.name === "KANYE_WEST")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -532,10 +521,9 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "JOE_BIDEN")
-                    ? "border border-border"
-                    : ""
+                `${agent.some((a) => a.name === "JOE_BIDEN")
+                  ? "border border-border"
+                  : ""
                 }`,
               )}
               onClick={() => {
@@ -561,11 +549,10 @@ export default function CreateVideo({
               }}
             >
               <Image
-                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${
-                  agent.some((a) => a.name === "JOE_BIDEN")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${agent.some((a) => a.name === "JOE_BIDEN")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -582,40 +569,38 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "LIL_YACHTY")
-                    ? "border border-border"
-                    : ""
+                `${agent.some((a) => a.name === "LIL_WAYNE")
+                  ? "border border-border"
+                  : ""
                 }`,
               )}
               onClick={() => {
                 if (
                   agent.length === 2 &&
-                  !agent.some((a) => a.name === "LIL_YACHTY")
+                  !agent.some((a) => a.name === "LIL_WAYNE")
                 ) {
                   return;
                 }
                 setAgent((currentAgents) => {
                   const isBarackObama = currentAgents.some(
-                    (agent) => agent.name === "LIL_YACHTY",
+                    (agent) => agent.name === "LIL_WAYNE",
                   );
 
                   if (isBarackObama) {
                     return currentAgents.filter(
-                      (agent) => agent.name !== "LIL_YACHTY",
+                      (agent) => agent.name !== "LIL_WAYNE",
                     );
                   } else {
-                    return [...currentAgents, { name: "LIL_YACHTY", id: 6 }];
+                    return [...currentAgents, { name: "LIL_WAYNE", id: 6 }];
                   }
                 });
               }}
             >
               <Image
-                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${
-                  agent.some((a) => a.name === "LIL_YACHTY")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${agent.some((a) => a.name === "LIL_WAYNE")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -632,10 +617,9 @@ export default function CreateVideo({
             <div
               className={cn(
                 `relative cursor-pointer overflow-hidden rounded-full border border-border bg-secondary transition-all hover:scale-[102%] active:scale-[98%]`,
-                `${
-                  agent.some((a) => a.name === "MARK_ZUCKERBERG")
-                    ? "border border-border"
-                    : ""
+                `${agent.some((a) => a.name === "MARK_ZUCKERBERG")
+                  ? "border border-border"
+                  : ""
                 }`,
               )}
               onClick={() => {
@@ -664,11 +648,10 @@ export default function CreateVideo({
               }}
             >
               <Image
-                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${
-                  agent.some((a) => a.name === "MARK_ZUCKERBERG")
-                    ? "opacity-40"
-                    : "opacity-0"
-                }`}
+                className={`absolute bottom-0 left-0 right-0 top-0 z-20  transition-all ${agent.some((a) => a.name === "MARK_ZUCKERBERG")
+                  ? "opacity-40"
+                  : "opacity-0"
+                  }`}
                 height={75}
                 width={75}
                 src={"https://images.smart.wtf/fireball.gif"}
@@ -717,9 +700,8 @@ export default function CreateVideo({
                     }}
                   >
                     <Image
-                      className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                        background === "TRUCK" ? "opacity-40" : "opacity-0"
-                      }`}
+                      className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${background === "TRUCK" ? "opacity-40" : "opacity-0"
+                        }`}
                       height={90}
                       width={90}
                       src={"https://images.smart.wtf/fireball.gif"}
@@ -746,9 +728,8 @@ export default function CreateVideo({
                     }}
                   >
                     <Image
-                      className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                        background === "MINECRAFT" ? "opacity-40" : "opacity-0"
-                      }`}
+                      className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${background === "MINECRAFT" ? "opacity-40" : "opacity-0"
+                        }`}
                       height={90}
                       width={90}
                       src={"https://images.smart.wtf/fireball.gif"}
@@ -775,9 +756,8 @@ export default function CreateVideo({
                     }}
                   >
                     <Image
-                      className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                        background === "GTA" ? "opacity-40" : "opacity-0"
-                      }`}
+                      className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${background === "GTA" ? "opacity-40" : "opacity-0"
+                        }`}
                       height={90}
                       width={90}
                       src={"https://images.smart.wtf/fireball.gif"}
@@ -808,9 +788,8 @@ export default function CreateVideo({
                 </div>
 
                 <div
-                  className={`flex flex-wrap gap-2 ${
-                    music === "NONE" ? "opacity-50" : ""
-                  }`}
+                  className={`flex flex-wrap gap-2 ${music === "NONE" ? "opacity-50" : ""
+                    }`}
                 >
                   <Tooltip>
                     <TooltipTrigger>
@@ -827,11 +806,10 @@ export default function CreateVideo({
                         }}
                       >
                         <Image
-                          className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                            music === "WII_SHOP_CHANNEL_TRAP"
-                              ? "opacity-40"
-                              : "opacity-0"
-                          }`}
+                          className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${music === "WII_SHOP_CHANNEL_TRAP"
+                            ? "opacity-40"
+                            : "opacity-0"
+                            }`}
                           height={90}
                           width={90}
                           src={"https://images.smart.wtf/fireball.gif"}
@@ -865,11 +843,10 @@ export default function CreateVideo({
                         }}
                       >
                         <Image
-                          className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                            music === "MONKEYS_SPINNING_MONKEYS"
-                              ? "opacity-40"
-                              : "opacity-0"
-                          }`}
+                          className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${music === "MONKEYS_SPINNING_MONKEYS"
+                            ? "opacity-40"
+                            : "opacity-0"
+                            }`}
                           height={90}
                           width={90}
                           src={"https://images.smart.wtf/fireball.gif"}
@@ -903,11 +880,10 @@ export default function CreateVideo({
                         }}
                       >
                         <Image
-                          className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${
-                            music === "FLUFFING_A_DUCK"
-                              ? "opacity-40"
-                              : "opacity-0"
-                          }`}
+                          className={`absolute bottom-0 left-0 right-0 top-0 z-20 transition-all ${music === "FLUFFING_A_DUCK"
+                            ? "opacity-40"
+                            : "opacity-0"
+                            }`}
                           height={90}
                           width={90}
                           src={"https://images.smart.wtf/fireball.gif"}

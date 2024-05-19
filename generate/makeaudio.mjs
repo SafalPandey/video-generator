@@ -6,7 +6,7 @@ dotenv.config();
 
 // andrew-tate, joe-rogan, donald-trump, mark-zuckerberg, alex-jones, bill-gates
 
-async function generateAudio(voice_id, person, line, index) {
+export async function generateAudio(voice_id, person, line, index) {
 	const response = await fetch('https://api.neets.ai/v1/tts', {
 		method: 'POST',
 		headers: {
@@ -40,10 +40,15 @@ async function generateAudio(voice_id, person, line, index) {
 }
 
 (async () => {
-	await generateAudio(
-		'donald-trump',
-		'ROBERT_DOWNEY_JR',
-		'Believe me, Bill, reinforcement learning has been tremendous from the very beginning. It started with the work of Edward Thorndike, a real winner. He discovered the law of effect, which is all about how behavior is modified based on its consequences.',
-		0
-	);
+	try {
+		
+		await generateAudio(
+			'robert-downey-jr',
+			'ROBERT_DOWNEY_JR',
+			'Believe me, Bill, reinforcement learning has been tremendous from the very beginning. It started with the work of Edward Thorndike, a real winner. He discovered the law of effect, which is all about how behavior is modified based on its consequences.',
+			0
+		);
+	} catch (error) {
+		console.error(error)
+	}
 })();

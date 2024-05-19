@@ -64,22 +64,22 @@ export async function generateTranscriptAudio(
 
 		const voice_id =
 			person === 'JOE_ROGAN'
-				? process.env.JOE_ROGAN_VOICE_ID
-				: person === 'BARACK_OBAMA'
-				? process.env.BARACK_OBAMA_VOICE_ID
-				: person === 'BEN_SHAPIRO'
-				? process.env.BEN_SHAPIRO_VOICE_ID
-				: person === 'RICK_SANCHEZ'
-				? process.env.RICK_SANCHEZ_VOICE_ID
-				: person === 'DONALD_TRUMP'
-				? process.env.DONALD_TRUMP_VOICE_ID
-				: person === 'MARK_ZUCKERBERG'
-				? process.env.MARK_ZUCKERBERG_VOICE_ID
-				: person === 'JOE_BIDEN'
-				? process.env.JOE_BIDEN_VOICE_ID
-				: person === 'LIL_YACHTY'
-				? process.env.LIL_YACHTY_VOICE_ID
-				: process.env.JORDAN_PETERSON_VOICE_ID;
+				? 'joe-rogan'
+				: person === 'KANYE_WEST'
+					? 'kanye-west'
+					: person === 'BEN_SHAPIRO'
+						? 'ben-shapiro'
+						: person === 'ANDREW_TATE'
+							? 'andrew-tate'
+							: person === 'DONALD_TRUMP'
+								? 'donald-trump'
+								: person === 'MARK_ZUCKERBERG'
+									? 'mark-zuckerberg'
+									: person === 'JOE_BIDEN'
+										? 'joe-biden'
+										: person === 'LIL_WAYNE'
+											? 'lil-wayne'
+											: 'jordan-peterson';
 
 		await generateAudio(voice_id, person, line, i);
 		audios.push({
@@ -88,7 +88,7 @@ export async function generateTranscriptAudio(
 			index: i,
 			image:
 				ai && duration === 1
-					? images[i].imageUrl
+					? `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}`
 					: images[i]?.link || 'https://images.smart.wtf/black.png',
 		});
 	}
@@ -98,24 +98,23 @@ export async function generateTranscriptAudio(
 	const contextContent = `
 import { staticFile } from 'remotion';
 
-export const music: string = ${
-		music === 'NONE' ? `'NONE'` : `'/music/${music}.MP3'`
-	};
+export const music: string = ${music === 'NONE' ? `'NONE'` : `'/music/${music}.MP3'`
+		};
 export const fps = ${fps};
 export const initialAgentName = '${initialAgentName}';
 export const videoFileName = '/background/${background}-' + ${Math.floor(
-		Math.random() * 10
-	)} + '.mp4';
+			Math.random() * 10
+		)} + '.mp4';
 export const subtitlesFileName = [
   ${audios
-		.map(
-			(entry, i) => `{
+			.map(
+				(entry, i) => `{
     name: '${entry.person}',
     file: staticFile('srt/${entry.person}-${i}.srt'),
     asset: '${entry.image}',
   }`
-		)
-		.join(',\n  ')}
+			)
+			.join(',\n  ')}
 ];
 `;
 
@@ -125,24 +124,20 @@ export const subtitlesFileName = [
 }
 
 export async function generateAudio(voice_id, person, line, index) {
-	const response = await fetch(
-		`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`,
-		{
-			method: 'POST',
-			headers: {
-				'xi-api-key': process.env.ELEVEN_API_KEY,
-				'Content-Type': 'application/json',
+	const response = await fetch('https://api.neets.ai/v1/tts', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-API-Key': process.env.NEETS_API_KEY,
+		},
+		body: JSON.stringify({
+			text: line,
+			voice_id: voice_id,
+			params: {
+				model: 'ar-diff-50k',
 			},
-			body: JSON.stringify({
-				model_id: 'eleven_multilingual_v2',
-				text: line,
-				voice_settings: {
-					stability: 0.5,
-					similarity_boost: 0.75,
-				},
-			}),
-		}
-	);
+		}),
+	});
 
 	if (!response.ok) {
 		throw new Error(`Server responded with status code ${response.status}`);
@@ -166,7 +161,39 @@ async function fetchValidImages(transcript, length, ai, duration) {
 		const promises = [];
 
 		for (let i = 0; i < length; i++) {
-			promises.push(imageGeneneration(transcript[i].asset));
+			var myHeaders = new Headers();
+			myHeaders.append("Content-Type", "application/json");
+
+			var raw = JSON.stringify({
+				//   "key": "",
+				"prompt": `Create an image with vibrant coloring and scenery. ${transcript[i].asset} realistic and vivid`,
+				//   "negative_prompt": null,
+				"width": "512",
+				"height": "512",
+				"samples": "1",
+				"num_inference_steps": "50",
+				//   "seed": null,
+				//   "guidance_scale": 7.5,
+				//   "safety_checker": "yes",
+				//   "multi_lingual": "no",
+				//   "panorama": "no",
+				//   "self_attention": "no",
+				//   "upscale": "no",
+				//   "embeddings_model": null,
+				//   "webhook": null,
+				//   "track_id": null
+			});
+
+			var requestOptions = {
+				method: 'POST',
+				headers: myHeaders,
+				body: raw,
+			};
+
+			const result = fetch("http://localhost:7861/sdapi/v1/txt2img", requestOptions)
+				.then(response => response.json())
+				.catch(error => console.log('error', error));
+			promises.push(result);
 		}
 
 		const aiImages = await Promise.all(promises);
@@ -178,8 +205,7 @@ async function fetchValidImages(transcript, length, ai, duration) {
 			const imageFetch = await fetch(
 				`https://www.googleapis.com/customsearch/v1?q=${encodeURI(
 					transcript[i].asset
-				)}&cx=${process.env.GOOGLE_CX}&searchType=image&key=${
-					process.env.GOOGLE_API_KEY
+				)}&cx=${process.env.GOOGLE_CX}&searchType=image&key=${process.env.GOOGLE_API_KEY
 				}&num=${4}`,
 				{
 					method: 'GET',
@@ -249,7 +275,7 @@ async function checkImageHeaders(url) {
 const imagePrompt = async (title) => {
 	try {
 		const response = await openai.chat.completions.create({
-			model: 'ft:gpt-3.5-turbo-1106:personal::8TEhcfKm',
+			model: 'gpt-3.5-turbo',
 			messages: [
 				{
 					role: 'user',
