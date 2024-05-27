@@ -9,9 +9,27 @@ const groq = new Groq({
 async function generateTranscript(topic, agentA, agentB, duration) {
 	const completion = await groq.chat.completions.create({
 		messages: [
+			// {
+			// 	role: 'system',
+			// 	content: `Create a dialogue for a short-form conversation on any controversial topic (anything except climate change). The conversation should be between two agents, ${agentA.replace(
+			// 		'_',
+			// 		' '
+			// 	)} and ${agentB.replace("_", " ")}, each with their unique mannerisms and speech patterns. ${agentA.replace(
+			// 		'_',
+			// 		' '
+			// 	)} should engage with the topic with a sense of curiosity and a desire for practical understanding, while ${agentB.replace(
+			// 		'_',
+			// 		' '
+			// 	)} offers a deep, analytical perspective. The dialogue should be engaging and include light humor, yet still provide meaningful insights into the topic. Limit the dialogue to a MAXIMUM OF ${4
+			// 		} EXCHANGES, aiming for a concise transcript that would last less than 1 minute. The person attribute should either be ${agentA} or ${agentB}. The line attribute should be that character's line of dialogue. I also need an asset description under the asset attribute which would be a relevant search query to find an image which should be relevant to the overall topic of the conversation. The asset descriptions shouldn't be vague, but a description of something that you think would be a good image to go along with the conversation. Specificity is key. The JSON format WHICH MUST BE ADHERED TO ALWAYS is as follows: { transcript: { [ {'person': 'the exact value of ${agentA} or ${agentB} depending on who is talking', 'line': 'their line of conversation in the dialog', asset: 'relevant image generate query based on the current line'} ] } }`,
+			// },
+			// {
+			// 	role: 'user',
+			// 	content: `generate a video about any specific controversial topic. Both the agents should talk about it in a way they would, but extremify their qualities and make the conversation risque if either agents are controversial. Try to make the conversation as controversial as possible. Also the conversation should be resolved at the end. Make them use vulgar words as each other.`,
+			// },
 			{
 				role: 'system',
-				content: `Create a dialogue for a short-form conversation on the topic of ${topic}. The conversation should be between two agents, ${agentA.replace(
+				content: `Create a dialogue for a short-form conversation on programming with javascript topic. The conversation should be between two agents, ${agentA.replace(
 					'_',
 					' '
 				)} and ${agentB.replace("_", " ")}, each with their unique mannerisms and speech patterns. ${agentA.replace(
@@ -20,12 +38,12 @@ async function generateTranscript(topic, agentA, agentB, duration) {
 				)} should engage with the topic with a sense of curiosity and a desire for practical understanding, while ${agentB.replace(
 					'_',
 					' '
-				)} offers a deep, analytical perspective. The dialogue should be engaging and include light humor, yet still provide meaningful insights into ${topic}. Limit the dialogue to a maximum of ${duration * 7
-					} exchanges, aiming for a concise transcript that would last between ${duration} minutes. The person attribute should either be ${agentA} or ${agentB}. The line attribute should be that character's line of dialogue. I also need an asset description under the asset attribute which would be a relevant search query to find an image which should be relevant to the overall topic of the conversation. The asset descriptions shouldn't be vague, but a description of something that you think would be a good image to go along with the conversation. Specificity is key. The JSON format WHICH MUST BE ADHERED TO ALWAYS is as follows: { transcript: { [ {'person': 'the exact value of ${agentA} or ${agentB} depending on who is talking', 'line': 'their line of conversation in the dialog', asset: 'relevant image generate query based on the current line'} ] } }`,
+				)} offers a deep, analytical perspective. The dialogue should be engaging and include light humor, yet still provide meaningful insights into the topic. Limit the dialogue to a MAXIMUM OF ${4
+					} EXCHANGES, aiming for a concise transcript that would last less than 1 minute but more than 50 seconds. The person attribute should either be ${agentA} or ${agentB}. The line attribute should be that character's line of dialogue. I also need an asset description under the asset attribute which would be a relevant search query to find an image which should be relevant to the overall topic of the conversation. The asset descriptions shouldn't be vague, but a description of something that you think would be a good image to go along with the conversation. Specificity is key. The JSON format WHICH MUST BE ADHERED TO ALWAYS is as follows: { transcript: { [ {'person': 'the exact value of ${agentA} or ${agentB} depending on who is talking', 'line': 'their line of conversation in the dialog. important to note that if they are mentioning any code specifics even like the word javascript make sure it is spelled in a way that makes sure AI voice overs pronounce it properly in the line attribute!', 'code': \`well formatted valid javascript code content here. include newline characters and never use backticks inside the code content!\`,'asset': 'relevant image generate query based on the current line'} ] } }`,
 			},
 			{
 				role: 'user',
-				content: `generate a video about ${topic}. Both the agents should talk about it in a way they would, but extremify their qualities and make the conversation risque if either agents are controversial.`,
+				content: `generate a video about any specific javascript concept/pattern/inbuilt function that is highly useful and try not to use repetitive topics like reduce. Both the agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial. Also the conversation should be resolved at the end. Make the second person teach the first person about any inbuilt useful function of javascript. Also, always end with a like and subscribe to learn more code message from both!`,
 			},
 		],
 		response_format: { type: 'json_object' },

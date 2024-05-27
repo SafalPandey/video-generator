@@ -1,4 +1,6 @@
 import { useAudioData, visualizeAudio } from '@remotion/media-utils';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import React, { useEffect, useRef, useState } from 'react';
 import {
 	AbsoluteFill,
@@ -24,6 +26,7 @@ type SubtitleEntry = {
 	text: string;
 	srt: string;
 	srtFileIndex: number;
+	code: string;
 };
 
 const AgentDetailsSchema = z.record(
@@ -52,6 +55,7 @@ const srtTimeToSeconds = (srtTime: string) => {
 
 const parseSRT = (
 	srtContent: string,
+	code: string,
 	srtFileIndex: number
 ): SubtitleEntry[] => {
 	// Split content into subtitle blocks
@@ -87,6 +91,7 @@ const parseSRT = (
 				text: textLines,
 				srt: block, // Include only this block of text
 				srtFileIndex, // Add the index of the SRT file
+				code
 			};
 		})
 		.filter((entry): entry is SubtitleEntry => entry !== null);
@@ -98,6 +103,7 @@ const SubtitleFileSchema = z.object({
 		message: 'Subtitle file must be a .srt file',
 	}),
 	asset: z.string(),
+	code: z.string(),
 });
 
 export const AudioGramSchema = z.object({
@@ -198,14 +204,15 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	const { durationInFrames, fps } = useVideoConfig();
 	const frame = useCurrentFrame();
 	const [subtitlesData, setSubtitlesData] = useState<SubtitleEntry[]>([]);
-	const [currentSubtitle, setCurrentSubtitle] = useState<SubtitleEntry>(
+	const [currentSubtitle, setCurrentSubtitle] = useState<SubtitleEntry | null>(
 		{
 			endTime: 0,
 			index: "0",
 			srt: "",
 			srtFileIndex: 0,
 			startTime: 0,
-			text: ""
+			text: "",
+			code: ""
 		}
 	);
 	const [handle] = useState<number | null>(null);
@@ -217,15 +224,17 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	useEffect(() => {
 		if (subtitlesData.length > 0) {
 			const currentTime = frame / fps;
-			const prevSubtitle = subtitlesData[prevImageIdx]
+			const currentSubtitle = subtitlesData.find(
+				(subtitle) =>
+					currentTime >= subtitle.startTime && currentTime < subtitle.endTime
+			);
 
-			const validateCurrentSub = () => currentTime >= prevSubtitle.startTime && currentTime < prevSubtitle.endTime;
-
-			if (!validateCurrentSub()) {
-				const nextSubtitleFileName = subtitlesFileName[prevImageIdx + 1]
-				setCurrentSubtitle(subtitlesData[prevImageIdx + 1])
-				setPrevImageIdx(prevImageIdx + 1)
-				setCurrentAgentName(nextSubtitleFileName.name)
+			if (currentSubtitle) {
+				setPrevImageIdx(currentSubtitle.srtFileIndex);
+				setCurrentSubtitle(currentSubtitle);
+				// Use the srtFileIndex to find the corresponding agent name
+				const agentInfo = subtitlesFileName[currentSubtitle.srtFileIndex];
+				setCurrentAgentName(agentInfo.name);
 			}
 		}
 	}, [frame, fps, subtitlesData, subtitlesFileName]);
@@ -236,12 +245,12 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 			try {
 				// console.log("called fetchSubData", subtitlesFileName)
 				const data = await Promise.all(
-					subtitlesFileName.map(async ({ file }, index) => {
+					subtitlesFileName.map(async ({ file, code }, index) => {
 						// Pass the index to parseSRT
 						const response = await fetch(file);
 						const text = await response.text();
 						// console.log(response, text, "asda", response.url)
-						return parseSRT(text, index);
+						return parseSRT(text, code, index);
 					})
 				);
 				setSubtitlesData(data.flat().sort((a, b) => a.startTime - b.startTime));
@@ -261,7 +270,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 				(subtitle) =>
 					currentTime >= subtitle.startTime && currentTime < subtitle.endTime
 			);
-			setCurrentSubtitle(current || currentSubtitle);
+			setCurrentSubtitle(current || null);
 		}
 	}, [frame, fps, subtitlesData]);
 
@@ -288,9 +297,14 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 				<Sequence from={-audioOffsetInFrames}>
 					{/*@ts-ignore */}
 					<Audio src={audioFileName} />
-					{music !== 'NONE' && <Audio volume={0.25} src={staticFile(music)} />}
+					{music !== 'NONE' && <Audio volume={0.15} src={staticFile(music)} />}
 					<div className="relative -z-20 flex flex-col w-full h-full font-remotionFont">
 						<div className="w-full h-[50%] relative">
+							{currentSubtitle?.code && <div className='text-white font-remotionFont text-xl z-20' style={{ position: "fixed", top: "2%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal", /*backgroundColor: "black"*/ }}>
+								<SyntaxHighlighter language='javascript' style={solarizedlight}>
+									{currentSubtitle.code}
+								</SyntaxHighlighter>
+							</div>}
 							{/*@ts-ignore */}
 							<Img
 								src={

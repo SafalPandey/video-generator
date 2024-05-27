@@ -6,6 +6,11 @@ import { rm, mkdir, unlink } from 'fs/promises';
 
 export const PROCESS_ID = 0;
 
+function getRandomElement(elements) {
+	const selectedIndex = Math.floor(Math.random() * elements.length);
+	return elements[selectedIndex]
+}
+
 async function cleanupResources() {
 	try {
 		await rm(path.join('public', 'srt'), { recursive: true, force: true });
@@ -31,7 +36,7 @@ const agents = [
 	'DONALD_TRUMP',
 	'MARK_ZUCKERBERG',
 	'JOE_BIDEN',
-	'LIL_WAYNE',
+	// 'LIL_WAYNE',
 	'ANDREW_TATE',
 ];
 
@@ -39,16 +44,10 @@ const local = true;
 
 async function main() {
 	const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-	let agentAIndex = Math.floor(Math.random() * agents.length);
-	let agentBIndex;
-
-	do {
-		agentBIndex = Math.floor(Math.random() * agents.length);
-	} while (agentAIndex === agentBIndex);
 
 	// CHANGE THIS VALUE FOR YOUR CHOICE OF AGENTS
-	const agentA = agents[2];
-	const agentB = agents[3];
+	const agentA = getRandomElement(agents);
+	const agentB = getRandomElement(agents.filter(agent => agent !== agentA));
 
 	// CHANGE THIS VALUE FOR A CUSTOM VIDEO TOPIC
 	// const videoTopic = 'Proximal Policy Optimization';
@@ -56,9 +55,9 @@ async function main() {
 	const fps = 60;
 	const duration = 1; //minute
 	//MINECRAFT or TRUCK or GTA
-	const background = 'MINECRAFT';
-	const music = 'NONE';
-	const cleanSrt = true;
+	const background = 'GTA';
+	const music = 'WII_SHOP_CHANNEL_TRAP';
+ 	const cleanSrt = false;
 
 	await transcribeFunction(
 		local,

@@ -61,6 +61,7 @@ export async function generateTranscriptAudio(
 	for (let i = 0; i < transcript.length; i++) {
 		const person = transcript[i].person;
 		const line = transcript[i].line;
+		const code = transcript[i].code;
 
 		const voice_id =
 			person === 'JOE_ROGAN'
@@ -86,6 +87,7 @@ export async function generateTranscriptAudio(
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
 			index: i,
+			code,
 			image:
 				ai && duration === 1
 					? `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}`
@@ -112,6 +114,7 @@ export const subtitlesFileName = [
     name: '${entry.person}',
     file: staticFile('srt/${entry.person}-${i}.srt'),
     asset: '${entry.image}',
+	code: \`${entry.code}\`,
   }`
 			)
 			.join(',\n  ')}
@@ -163,18 +166,19 @@ async function fetchValidImages(transcript, length, ai, duration) {
 		for (let i = 0; i < length; i++) {
 			var myHeaders = new Headers();
 			myHeaders.append("Content-Type", "application/json");
+			console.log(transcript[i].asset)
 
 			var raw = JSON.stringify({
 				//   "key": "",
-				"prompt": `Create an image with vibrant coloring and scenery. ${transcript[i].asset} realistic and vivid`,
+				"prompt": `${transcript[i].asset} realistic`,
 				//   "negative_prompt": null,
 				"width": "512",
 				"height": "512",
-				"samples": "1",
-				"num_inference_steps": "50",
+				"samples": "3",
+				"num_inference_steps": "2",
 				//   "seed": null,
 				//   "guidance_scale": 7.5,
-				//   "safety_checker": "yes",
+				  "safety_checker": "no",
 				//   "multi_lingual": "no",
 				//   "panorama": "no",
 				//   "self_attention": "no",
