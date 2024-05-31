@@ -297,10 +297,10 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 				<Sequence from={-audioOffsetInFrames}>
 					{/*@ts-ignore */}
 					<Audio src={audioFileName} />
-					{music !== 'NONE' && <Audio volume={0.15} src={staticFile(music)} />}
+					{music !== 'NONE' && <Audio volume={0.08} src={staticFile(music)} />}
 					<div className="relative -z-20 flex flex-col w-full h-full font-remotionFont">
 						<div className="w-full h-[50%] relative">
-							{currentSubtitle?.code && <div className='text-white font-remotionFont text-xl z-20' style={{ position: "fixed", top: "2%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal", /*backgroundColor: "black"*/ }}>
+							{currentSubtitle?.code && <div className='text-white font-remotionFont text-xl z-20' style={{ position: "fixed", top: "3%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal" }}>
 								<SyntaxHighlighter language='javascript' style={solarizedlight}>
 									{currentSubtitle.code}
 								</SyntaxHighlighter>
@@ -328,8 +328,13 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 									width={200}
 									height={200}
 									className="z-30 transition-all rounded-full"
-									src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
-										}.png`}
+									// src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
+									// 	}.png`}
+									src={subtitlesFileName[
+										currentSubtitle?.srtFileIndex
+											? currentSubtitle.srtFileIndex
+											: prevImageIdx
+									].asset}
 								/>
 
 								<div>
@@ -337,7 +342,10 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 										audioSrc={audioFileName}
 										mirrorWave={mirrorWave}
 										waveColor={
-											agentDetails[currentAgentName || initialAgentName].color
+											(agentDetails[currentAgentName || initialAgentName] ?? {
+												color: '#0668E1',
+												image: 'black.png',
+											})?.color
 										}
 										numberOfSamples={Number(waveNumberOfSamples)}
 										freqRangeStartIndex={waveFreqRangeStartIndex}
@@ -371,6 +379,9 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 							</div>
 						</div>
 					</div>
+				</Sequence>
+				<Sequence from={durationInFrames - 3 * fps}>
+					<div className='text-white font-remotionFont flex flex-alignItems-center text-12xl' content="center">Created By S.R.P. Productions</div>
 				</Sequence>
 			</AbsoluteFill>
 		</div>

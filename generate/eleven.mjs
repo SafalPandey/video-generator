@@ -80,7 +80,20 @@ export async function generateTranscriptAudio(
 										? 'joe-biden'
 										: person === 'LIL_WAYNE'
 											? 'lil-wayne'
-											: 'jordan-peterson';
+											: person === 'BEN_AFFLECK' ? 'ben-affleck'
+												: person === 'ALEX_JONES' ? 'alex-jones'
+													: person === 'DRAKE' ? 'drake'
+														: person === 'ELON_MUSK' ? 'elon-musk'
+															: person === 'JUSTIN_BIEBER' ? 'justin-bieber'
+																: person === 'LEX_FRIDMAN' ? 'lex-fridman'
+																	: person === 'ROBERT_DOWNEY_JR' ? 'robert-downey-jr'
+																		: person === 'BILL_GATES' ? 'bill-gates'
+																		: person === 'DARTH_VADER' ? 'darth-vader'
+																		: person === 'BEYONCE' ? 'beyonce'
+																		: person === 'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I' ? 'sam-altman'
+
+
+																			: 'jordan-peterson';
 
 		await generateAudio(voice_id, person, line, i);
 		audios.push({
@@ -114,7 +127,7 @@ export const subtitlesFileName = [
     name: '${entry.person}',
     file: staticFile('srt/${entry.person}-${i}.srt'),
     asset: '${entry.image}',
-	code: \`${entry.code}\`,
+	code: \`${entry.code.replaceAll("\`", "\\\`").replaceAll("$", "\\$").replaceAll(";", ";\n")}\`,
   }`
 			)
 			.join(',\n  ')}
@@ -170,15 +183,15 @@ async function fetchValidImages(transcript, length, ai, duration) {
 
 			var raw = JSON.stringify({
 				//   "key": "",
-				"prompt": `${transcript[i].asset} realistic`,
+				"prompt": `${transcript[i].asset} realistic and clean looking`,
 				//   "negative_prompt": null,
-				"width": "512",
-				"height": "512",
+				"width": "720",
+				"height": "720",
 				"samples": "3",
 				"num_inference_steps": "2",
 				//   "seed": null,
 				//   "guidance_scale": 7.5,
-				  "safety_checker": "no",
+				"safety_checker": "no",
 				//   "multi_lingual": "no",
 				//   "panorama": "no",
 				//   "self_attention": "no",

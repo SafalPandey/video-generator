@@ -33,10 +33,19 @@ const agents = [
 	'BEN_SHAPIRO',
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',
+	'ALEX_JONES',
+	'BEN_AFFLECK',
+	'DRAKE',
+	'ELON_MUSK',
+	'JUSTIN_BIEBER',
+	'LEX_FRIDMAN',
+	'ROBERT_DOWNEY_JR',
+	'BILL_GATES',
+	'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I',
 	'DONALD_TRUMP',
 	'MARK_ZUCKERBERG',
 	'JOE_BIDEN',
-	// 'LIL_WAYNE',
+	'LIL_WAYNE',
 	'ANDREW_TATE',
 ];
 
@@ -55,9 +64,9 @@ async function main() {
 	const fps = 60;
 	const duration = 1; //minute
 	//MINECRAFT or TRUCK or GTA
-	const background = 'GTA';
-	const music = 'WII_SHOP_CHANNEL_TRAP';
- 	const cleanSrt = false;
+	const background = Math.random() < 0.5 ? 'GTA' : "MINECRAFT";
+	const music = getRandomElement(['WII_SHOP_CHANNEL_TRAP', 'FLUFFING_A_DUCK', 'MONKEYS_SPINNING_MONKEYS']);
+	const cleanSrt = false;
 
 	await transcribeFunction(
 		local,
