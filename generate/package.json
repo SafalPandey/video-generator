@@ -10,6 +10,7 @@
 	},
 	"repository": {},
 	"license": "UNLICENSED",
+	"authors": ["safal.pandey.sp@gmail.com", "noahsolomon2003@gmail.com"],
 	"dependencies": {
 		"@aws-sdk/client-sqs": "^3.511.0",
 		"@remotion/cli": "4.0.140",

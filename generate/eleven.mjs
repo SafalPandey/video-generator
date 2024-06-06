@@ -88,12 +88,12 @@ export async function generateTranscriptAudio(
 																: person === 'LEX_FRIDMAN' ? 'lex-fridman'
 																	: person === 'ROBERT_DOWNEY_JR' ? 'robert-downey-jr'
 																		: person === 'BILL_GATES' ? 'bill-gates'
-																		: person === 'DARTH_VADER' ? 'darth-vader'
-																		: person === 'BEYONCE' ? 'beyonce'
-																		: person === 'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I' ? 'sam-altman'
+																			: person === 'DARTH_VADER' ? 'darth-vader'
+																				: person === 'BEYONCE' ? 'beyonce'
+																					: person === 'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I' ? 'sam-altman'
 
 
-																			: 'jordan-peterson';
+																						: 'jordan-peterson';
 
 		await generateAudio(voice_id, person, line, i);
 		audios.push({
@@ -103,7 +103,7 @@ export async function generateTranscriptAudio(
 			code,
 			image:
 				ai && duration === 1
-					? `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}`
+					? images?.[i]?.images?.[0] && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` || 'https://images.smart.wtf/black.png'
 					: images[i]?.link || 'https://images.smart.wtf/black.png',
 		});
 	}

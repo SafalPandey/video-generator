@@ -52,7 +52,8 @@ const agents = [
 const local = true;
 
 async function main() {
-	const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+	// const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+	const promptedTopic = process.argv.slice(2).join(" ");
 
 	// CHANGE THIS VALUE FOR YOUR CHOICE OF AGENTS
 	const agentA = getRandomElement(agents);
@@ -64,13 +65,13 @@ async function main() {
 	const fps = 60;
 	const duration = 1; //minute
 	//MINECRAFT or TRUCK or GTA
-	const background = Math.random() < 0.5 ? 'GTA' : "MINECRAFT";
+	const background = Math.random() < 0.5 ? 'GTA' : "GTA";
 	const music = getRandomElement(['WII_SHOP_CHANNEL_TRAP', 'FLUFFING_A_DUCK', 'MONKEYS_SPINNING_MONKEYS']);
 	const cleanSrt = false;
 
 	await transcribeFunction(
 		local,
-		randomTopic,
+		promptedTopic,
 		agentA,
 		agentB,
 		aiGeneratedImages,
