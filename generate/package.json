@@ -4,13 +4,16 @@
 	"description": "My Remotion video",
 	"scripts": {
 		"start": "remotion studio",
-		"build": "remotion render --log=error Video out/video.mp4",
+		"build": "remotion render --log=error Video ",
 		"upgrade": "remotion upgrade",
 		"test": "eslint src --ext ts,tsx,js,jsx && tsc"
 	},
 	"repository": {},
 	"license": "UNLICENSED",
-	"authors": ["safal.pandey.sp@gmail.com", "noahsolomon2003@gmail.com"],
+	"authors": [
+		"safal.pandey.sp@gmail.com",
+		"noahsolomon2003@gmail.com"
+	],
 	"dependencies": {
 		"@aws-sdk/client-sqs": "^3.511.0",
 		"@remotion/cli": "4.0.140",
@@ -28,6 +31,8 @@
 		"react-dom": "^18.0.0",
 		"react-syntax-highlighter": "^15.5.0",
 		"remotion": "4.0.140",
+		"sharp": "^0.33.4",
+		"ws": "^8.17.1",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {

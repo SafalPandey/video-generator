@@ -77,7 +77,7 @@ export default async function transcribeFunction(
 	cleanSrt,
 	videoId
 ) {
-	const { audios, transcript } = await generateTranscriptAudio(
+	const { audios, transcript, videoTitle } = await generateTranscriptAudio(
 		local,
 		topic,
 		agentA,
@@ -185,4 +185,6 @@ export default async function transcribeFunction(
 			);
 		}
 	}
+
+	return videoTitle
 }

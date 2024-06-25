@@ -12,7 +12,6 @@ import {
 	staticFile,
 	useCurrentFrame,
 	useVideoConfig,
-	Video,
 } from 'remotion';
 import { fps, music } from './tmp/context';
 import { PaginatedSubtitles } from './Subtitles';
@@ -299,20 +298,19 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 					<Audio src={audioFileName} />
 					{music !== 'NONE' && <Audio volume={0.08} src={staticFile(music)} />}
 					<div className="relative -z-20 flex flex-col w-full h-full font-remotionFont">
-						<div className="w-full h-[50%] relative">
-							{currentSubtitle?.code && <div className='text-white font-remotionFont text-xl z-20' style={{ position: "fixed", top: "3%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal" }}>
+						<div className="w-full h-[100%] relative">
+							{currentSubtitle?.code && <div className='text-white font-remotionFont text-3xl z-20' style={{ position: "fixed", top: "30%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal" }}>
 								<SyntaxHighlighter language='javascript' style={solarizedlight}>
 									{currentSubtitle.code}
 								</SyntaxHighlighter>
 							</div>}
 							{/*@ts-ignore */}
 							<Img
-								src={
-									subtitlesFileName[
-										currentSubtitle?.srtFileIndex
-											? currentSubtitle.srtFileIndex
-											: prevImageIdx
-									].asset
+								src={`http://0.0.0.0:8080/${subtitlesFileName[
+									currentSubtitle?.srtFileIndex
+										? currentSubtitle.srtFileIndex
+										: prevImageIdx
+								].asset.split("/").at(-1)}`
 								}
 								onError={(e) => {
 									/*@ts-ignore */
@@ -330,12 +328,30 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 									className="z-30 transition-all rounded-full"
 									// src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
 									// 	}.png`}
-									src={subtitlesFileName[
+									src={`http://0.0.0.0:8080/${subtitlesFileName[
 										currentSubtitle?.srtFileIndex
 											? currentSubtitle.srtFileIndex
 											: prevImageIdx
-									].asset}
+									].asset.split("/").at(-1)}`
+									}
 								/>
+								<div
+									style={{
+										lineHeight: `${subtitlesLineHeight}px`,
+										textShadow: '4px 4px 0px #000000',
+										WebkitTextStroke: '2px black',
+									}}
+									className="font-remotionFont z-10 absolute text-center text-8xl drop-shadow-2xl text-white mx-24 top-8 left-0 right-0"
+								>
+									<PaginatedSubtitles
+										subtitles={currentSrtContent.toUpperCase()}
+										startFrame={audioOffsetInFrames}
+										endFrame={audioOffsetInFrames + durationInFrames}
+										linesPerPage={subtitlesLinePerPage}
+										subtitlesZoomMeasurerSize={subtitlesZoomMeasurerSize}
+										subtitlesLineHeight={subtitlesLineHeight}
+									/>
+								</div>
 
 								<div>
 									<AudioViz
@@ -354,30 +370,13 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								</div>
 							</div>
 						</div>
-						<div className="relative w-full h-[50%]">
+						{/* <div className="relative w-full h-[50%]">
 							<OffthreadVideo
 								muted
 								className=" h-full w-full object-cover"
 								src={staticFile(videoFileName)}
 							/>
-							<div
-								style={{
-									lineHeight: `${subtitlesLineHeight}px`,
-									textShadow: '4px 4px 0px #000000',
-									WebkitTextStroke: '2px black',
-								}}
-								className="font-remotionFont z-10 absolute text-center text-8xl drop-shadow-2xl text-white mx-24 top-8 left-0 right-0"
-							>
-								<PaginatedSubtitles
-									subtitles={currentSrtContent.toUpperCase()}
-									startFrame={audioOffsetInFrames}
-									endFrame={audioOffsetInFrames + durationInFrames}
-									linesPerPage={subtitlesLinePerPage}
-									subtitlesZoomMeasurerSize={subtitlesZoomMeasurerSize}
-									subtitlesLineHeight={subtitlesLineHeight}
-								/>
-							</div>
-						</div>
+						</div> */}
 					</div>
 				</Sequence>
 				<Sequence from={durationInFrames - 3 * fps}>

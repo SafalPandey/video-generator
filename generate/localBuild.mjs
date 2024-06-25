@@ -33,7 +33,7 @@ const agents = [
 	'BEN_SHAPIRO',
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',
-	'ALEX_JONES',
+	// 'ALEX_JONES',
 	'BEN_AFFLECK',
 	'DRAKE',
 	'ELON_MUSK',
@@ -45,7 +45,7 @@ const agents = [
 	'DONALD_TRUMP',
 	'MARK_ZUCKERBERG',
 	'JOE_BIDEN',
-	'LIL_WAYNE',
+	// 'LIL_WAYNE',
 	'ANDREW_TATE',
 ];
 
@@ -69,7 +69,7 @@ async function main() {
 	const music = getRandomElement(['WII_SHOP_CHANNEL_TRAP', 'FLUFFING_A_DUCK', 'MONKEYS_SPINNING_MONKEYS']);
 	const cleanSrt = false;
 
-	await transcribeFunction(
+	const videoTitle = await transcribeFunction(
 		local,
 		promptedTopic,
 		agentA,
@@ -83,7 +83,7 @@ async function main() {
 	);
 
 	// run in the command line `npm run build`
-	exec('npm run build', async (error, stdout, stderr) => {
+	exec(`npm run build out/${videoTitle.replaceAll("'", "").replaceAll("\"", "").replaceAll(" ", "_")}.mp4`, async (error, stdout, stderr) => {
 		if (error) {
 			console.error(`exec error: ${error}`);
 			return;
@@ -92,7 +92,18 @@ async function main() {
 		console.error(`stderr: ${stderr}`);
 
 		cleanupResources();
+
+
+		exec(`python3 /home/leapfrog/projects/personal/video-generator/generate/uploadVideo.py`, async (err, stdout, stderr) => {
+			if (err) {
+				console.error(`exec error: ${err}`)
+				return
+			}
+			console.log(`stdout: ${stdout}`)
+			console.log(`stderr: ${stderr}`)
+		})
 	});
+
 }
 
 (async () => {

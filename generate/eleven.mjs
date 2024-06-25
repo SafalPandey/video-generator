@@ -13,6 +13,29 @@ const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY,
 });
 
+const VOICE_ID_MAP = {
+	'JOE_ROGAN': 'joe-rogan',
+	'KANYE_WEST': 'kanye-west',
+	'BEN_SHAPIRO': 'ben-shapiro',
+	'ANDREW_TATE': 'andrew-tate',
+	'DONALD_TRUMP': 'donald-trump',
+	'MARK_ZUCKERBERG': 'mark-zuckerberg',
+	'JOE_BIDEN': 'joe-biden',
+	'LIL_WAYNE': 'lil-wayne',
+	'BEN_AFFLECK': 'ben-affleck',
+	'ALEX_JONES': 'alex-jones',
+	'DRAKE': 'drake',
+	'ELON_MUSK': 'elon-musk',
+	'JUSTIN_BIEBER': 'justin-bieber',
+	'LEX_FRIDMAN': 'lex-fridman',
+	'ROBERT_DOWNEY_JR': 'robert-downey-jr',
+	'BILL_GATES': 'bill-gates',
+	'DARTH_VADER': 'darth-vader',
+	'BEYONCE': 'beyonce',
+	'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I': 'sam-altman',
+	'JORDAN_PETERSON': 'jordan-peterson'
+}
+
 export async function generateTranscriptAudio(
 	local,
 	topic,
@@ -32,8 +55,7 @@ export async function generateTranscriptAudio(
 		);
 	}
 
-	let transcript = (await transcriptFunction(topic, agentA, agentB, duration))
-		.transcript;
+	let {transcript: {transcript}, videoTitle} = await transcriptFunction(topic, agentA, agentB, duration);
 
 	const audios = [];
 
@@ -63,39 +85,10 @@ export async function generateTranscriptAudio(
 		const line = transcript[i].line;
 		const code = transcript[i].code;
 
-		const voice_id =
-			person === 'JOE_ROGAN'
-				? 'joe-rogan'
-				: person === 'KANYE_WEST'
-					? 'kanye-west'
-					: person === 'BEN_SHAPIRO'
-						? 'ben-shapiro'
-						: person === 'ANDREW_TATE'
-							? 'andrew-tate'
-							: person === 'DONALD_TRUMP'
-								? 'donald-trump'
-								: person === 'MARK_ZUCKERBERG'
-									? 'mark-zuckerberg'
-									: person === 'JOE_BIDEN'
-										? 'joe-biden'
-										: person === 'LIL_WAYNE'
-											? 'lil-wayne'
-											: person === 'BEN_AFFLECK' ? 'ben-affleck'
-												: person === 'ALEX_JONES' ? 'alex-jones'
-													: person === 'DRAKE' ? 'drake'
-														: person === 'ELON_MUSK' ? 'elon-musk'
-															: person === 'JUSTIN_BIEBER' ? 'justin-bieber'
-																: person === 'LEX_FRIDMAN' ? 'lex-fridman'
-																	: person === 'ROBERT_DOWNEY_JR' ? 'robert-downey-jr'
-																		: person === 'BILL_GATES' ? 'bill-gates'
-																			: person === 'DARTH_VADER' ? 'darth-vader'
-																				: person === 'BEYONCE' ? 'beyonce'
-																					: person === 'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I' ? 'sam-altman'
-
-
-																						: 'jordan-peterson';
+		const voice_id = VOICE_ID_MAP[person]
 
 		await generateAudio(voice_id, person, line, i);
+		console.log(images?.[i] , "IMIAGES[i]")
 		audios.push({
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
@@ -103,8 +96,9 @@ export async function generateTranscriptAudio(
 			code,
 			image:
 				ai && duration === 1
-					? images?.[i]?.images?.[0] && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` || 'https://images.smart.wtf/black.png'
-					: images[i]?.link || 'https://images.smart.wtf/black.png',
+					? images?.[i]?.["path"] || 'https://images.smart.wtf/black.png'
+					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` 
+					: images?.[i] || 'https://images.smart.wtf/black.png',
 		});
 	}
 
@@ -136,7 +130,7 @@ export const subtitlesFileName = [
 
 	await writeFile('src/tmp/context.tsx', contextContent, 'utf-8');
 
-	return { audios, transcript };
+	return { audios, transcript, videoTitle };
 }
 
 export async function generateAudio(voice_id, person, line, index) {
@@ -181,33 +175,30 @@ async function fetchValidImages(transcript, length, ai, duration) {
 			myHeaders.append("Content-Type", "application/json");
 			console.log(transcript[i].asset)
 
-			var raw = JSON.stringify({
-				//   "key": "",
-				"prompt": `${transcript[i].asset} realistic and clean looking`,
-				//   "negative_prompt": null,
-				"width": "720",
-				"height": "720",
-				"samples": "3",
-				"num_inference_steps": "2",
-				//   "seed": null,
-				//   "guidance_scale": 7.5,
-				"safety_checker": "no",
-				//   "multi_lingual": "no",
-				//   "panorama": "no",
-				//   "self_attention": "no",
-				//   "upscale": "no",
-				//   "embeddings_model": null,
-				//   "webhook": null,
-				//   "track_id": null
-			});
-
+			// var raw = JSON.stringify({
+			// 	//   "key": "",
+			// 	"prompt": `${transcript[i].asset} realistic and clean looking`,
+			// 	//   "negative_prompt": null,
+			// 	"width": "720",
+			// 	"height": "720",
+			// 	"samples": "3",
+			// 	"num_inference_steps": "2",
+			// 	//   "seed": null,
+			// 	//   "guidance_scale": 7.5,
+			// 	"safety_checker": "no",
+			// 	//   "multi_lingual": "no",
+			// 	//   "panorama": "no",
+			// 	//   "self_attention": "no",
+			// 	//   "upscale": "no",
+			// 	//   "embeddings_model": null,
+			// 	//   "webhook": null,
+			// 	//   "track_id": null
+			// });
 			var requestOptions = {
-				method: 'POST',
 				headers: myHeaders,
-				body: raw,
 			};
 
-			const result = fetch("http://localhost:7861/sdapi/v1/txt2img", requestOptions)
+			const result = fetch(`http://localhost:8000?prompt=${encodeURI(transcript[i].asset + " realistic and clean looking")}`, requestOptions)
 				.then(response => response.json())
 				.catch(error => console.log('error', error));
 			promises.push(result);
