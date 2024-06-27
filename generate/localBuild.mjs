@@ -99,8 +99,8 @@ async function main() {
 				console.error(`exec error: ${err}`)
 				return
 			}
-			console.log(`stdout: ${stdout}`)
-			console.log(`stderr: ${stderr}`)
+			stdout && console.log(`stdout: ${stdout}`)
+			stderr && console.log(`stderr: ${stderr}`)
 		})
 	});
 

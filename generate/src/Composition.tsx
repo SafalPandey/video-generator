@@ -184,6 +184,10 @@ const AudioViz: React.FC<{
 	);
 };
 
+function getRandomElement(arr: any[]) {
+	return arr[Math.floor(Math.random() * arr.length)]
+}
+
 export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	subtitlesFileName,
 	agentDetails,
@@ -218,7 +222,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	const [prevImageIdx, setPrevImageIdx] = useState<number>(0);
 	const ref = useRef<HTMLDivElement>(null);
 	const [currentSrtContent, setCurrentSrtContent] = useState<string>('');
-
+	const [currentAsset, setCurrentAsset] = useState<string>("");
 	// Determine the current subtitle and agent based on the frame
 	useEffect(() => {
 		if (subtitlesData.length > 0) {
@@ -270,9 +274,18 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 					currentTime >= subtitle.startTime && currentTime < subtitle.endTime
 			);
 			setCurrentSubtitle(current || null);
+			if (current) {
+				const newAssets = JSON.parse(subtitlesFileName[
+					current.srtFileIndex
+						? current.srtFileIndex
+						: prevImageIdx
+				].asset || "[]")
+			
+				console.log(newAssets)
+				setCurrentAsset(newAssets[0])
+			}
 		}
 	}, [frame, fps, subtitlesData]);
-
 	// Ensure that the delayRender handle is cleared when the component unmounts
 	useEffect(() => {
 		return () => {
@@ -306,11 +319,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 							</div>}
 							{/*@ts-ignore */}
 							<Img
-								src={`http://0.0.0.0:8080/${subtitlesFileName[
-									currentSubtitle?.srtFileIndex
-										? currentSubtitle.srtFileIndex
-										: prevImageIdx
-								].asset.split("/").at(-1)}`
+								src={`http://0.0.0.0:8080/${currentAsset}`
 								}
 								onError={(e) => {
 									/*@ts-ignore */
@@ -328,11 +337,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 									className="z-30 transition-all rounded-full"
 									// src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
 									// 	}.png`}
-									src={`http://0.0.0.0:8080/${subtitlesFileName[
-										currentSubtitle?.srtFileIndex
-											? currentSubtitle.srtFileIndex
-											: prevImageIdx
-									].asset.split("/").at(-1)}`
+									src={`http://0.0.0.0:8080/${currentAsset}`
 									}
 								/>
 								<div

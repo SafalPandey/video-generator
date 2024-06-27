@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
+import { exec } from 'child_process';
 import dotenv from 'dotenv';
 import transcriptFunction from './transcript.mjs';
 import { writeFile } from 'fs/promises';
@@ -55,7 +56,7 @@ export async function generateTranscriptAudio(
 		);
 	}
 
-	let {transcript: {transcript}, videoTitle} = await transcriptFunction(topic, agentA, agentB, duration);
+	let { transcript: { transcript }, videoTitle } = await transcriptFunction(topic, agentA, agentB, duration);
 
 	const audios = [];
 
@@ -88,15 +89,15 @@ export async function generateTranscriptAudio(
 		const voice_id = VOICE_ID_MAP[person]
 
 		await generateAudio(voice_id, person, line, i);
-		console.log(images?.[i] , "IMIAGES[i]")
+		console.log(images?.[i], "IMIAGES[i]")
 		audios.push({
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
 			index: i,
 			code,
-			image:
+			images:
 				ai && duration === 1
-					? images?.[i]?.["path"] || 'https://images.smart.wtf/black.png'
+					? images?.[i]?.["paths"] || 'https://images.smart.wtf/black.png'
 					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` 
 					: images?.[i] || 'https://images.smart.wtf/black.png',
 		});
@@ -120,7 +121,7 @@ export const subtitlesFileName = [
 				(entry, i) => `{
     name: '${entry.person}',
     file: staticFile('srt/${entry.person}-${i}.srt'),
-    asset: '${entry.image}',
+    asset: '${JSON.stringify(entry.images)}',
 	code: \`${entry.code.replaceAll("\`", "\\\`").replaceAll("$", "\\$").replaceAll(";", ";\n")}\`,
   }`
 			)
@@ -171,37 +172,67 @@ async function fetchValidImages(transcript, length, ai, duration) {
 		const promises = [];
 
 		for (let i = 0; i < length; i++) {
-			var myHeaders = new Headers();
-			myHeaders.append("Content-Type", "application/json");
-			console.log(transcript[i].asset)
+			// var myHeaders = new Headers();
+			// myHeaders.append("Content-Type", "application/json");
+			// console.log(transcript[i].asset)
 
-			// var raw = JSON.stringify({
-			// 	//   "key": "",
-			// 	"prompt": `${transcript[i].asset} realistic and clean looking`,
-			// 	//   "negative_prompt": null,
-			// 	"width": "720",
-			// 	"height": "720",
-			// 	"samples": "3",
-			// 	"num_inference_steps": "2",
-			// 	//   "seed": null,
-			// 	//   "guidance_scale": 7.5,
-			// 	"safety_checker": "no",
-			// 	//   "multi_lingual": "no",
-			// 	//   "panorama": "no",
-			// 	//   "self_attention": "no",
-			// 	//   "upscale": "no",
-			// 	//   "embeddings_model": null,
-			// 	//   "webhook": null,
-			// 	//   "track_id": null
-			// });
-			var requestOptions = {
-				headers: myHeaders,
-			};
+			// // var raw = JSON.stringify({
+			// // 	//   "key": "",
+			// // 	"prompt": `${transcript[i].asset} realistic and clean looking`,
+			// // 	//   "negative_prompt": null,
+			// // 	"width": "720",
+			// // 	"height": "720",
+			// // 	"samples": "3",
+			// // 	"num_inference_steps": "2",
+			// // 	//   "seed": null,
+			// // 	//   "guidance_scale": 7.5,
+			// // 	"safety_checker": "no",
+			// // 	//   "multi_lingual": "no",
+			// // 	//   "panorama": "no",
+			// // 	//   "self_attention": "no",
+			// // 	//   "upscale": "no",
+			// // 	//   "embeddings_model": null,
+			// // 	//   "webhook": null,
+			// // 	//   "track_id": null
+			// // });
+			// var requestOptions = {
+			// 	headers: myHeaders,
+			// };
 
-			const result = fetch(`http://localhost:8000?prompt=${encodeURI(transcript[i].asset + " realistic and clean looking")}`, requestOptions)
-				.then(response => response.json())
-				.catch(error => console.log('error', error));
-			promises.push(result);
+			// const result = fetch(`http://localhost:8000?prompt=${encodeURI(transcript[i].asset + " minimalist ")}`, requestOptions)
+			// 	.then(response => response.json())
+			// 	.catch(error => console.log('error', error));
+			// promises.push(result);
+
+			promises.push(new Promise((res, rej) => {
+				exec(`PROMPT='${transcript[i].asset.replace(/'/gi,"").replace(/"/gi, "") + " minimalist wide shot"}' /home/leapfrog/projects/personal/stable-diffusion-webui/venv/bin/python /home/leapfrog/projects/personal/ComfyUI/ComfyUI-to-Python-Extension/workflow_api_sd3_image.py`, async (err, stdout, stderr) => {
+					if (err) {
+						console.error(`exec error: ${err}`)
+						return
+					}
+					if (stderr) { console.log(`stderr: ${stderr}`); }
+					stdout && console.log(`stdout: ${stdout}`)
+
+					const val = `${stdout}`.split('\n').at(-2)
+					const parsedVal = JSON.parse(val)
+					console.log(parsedVal)
+
+					exec(`IMG_PATH='/home/leapfrog/projects/personal/ComfyUI/output/${parsedVal["paths"][0]}' /home/leapfrog/projects/personal/stable-diffusion-webui/venv/bin/python /home/leapfrog/projects/personal/ComfyUI/ComfyUI-to-Python-Extension/workflow_api.py`, async (err, stdout, stderr) => {
+						if (err) {
+							console.error(`exec error: ${err}`)
+							return
+						}
+
+						if (stderr) { console.log(`stderr: ${stderr}`); }
+						if (stdout) {
+							console.log(`stdout: ${stdout}`);
+							const val = `${stdout}`.split('\n').at(-2)
+
+							res(JSON.parse(val))
+						}
+					})
+				})
+			}))
 		}
 
 		const aiImages = await Promise.all(promises);
