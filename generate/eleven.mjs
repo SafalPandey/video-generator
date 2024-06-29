@@ -1,3 +1,4 @@
+import { spawn } from 'child_process';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import { exec } from 'child_process';
@@ -89,7 +90,7 @@ export async function generateTranscriptAudio(
 		const voice_id = VOICE_ID_MAP[person]
 
 		await generateAudio(voice_id, person, line, i);
-		console.log(images?.[i], "IMIAGES[i]")
+		console.log(images?.[0]["paths"][i], "IMAGES[0]paths[i]")
 		audios.push({
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
@@ -97,9 +98,9 @@ export async function generateTranscriptAudio(
 			code,
 			images:
 				ai && duration === 1
-					? images?.[i]?.["paths"] || 'https://images.smart.wtf/black.png'
+					? images?.[0]?.["paths"]?.[i] || 'https://images.smart.wtf/black.png'
 					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` 
-					: images?.[i] || 'https://images.smart.wtf/black.png',
+					: images?.[0] || 'https://images.smart.wtf/black.png',
 		});
 	}
 
@@ -121,7 +122,7 @@ export const subtitlesFileName = [
 				(entry, i) => `{
     name: '${entry.person}',
     file: staticFile('srt/${entry.person}-${i}.srt'),
-    asset: '${JSON.stringify(entry.images)}',
+    asset: '${entry.images}',
 	code: \`${entry.code.replaceAll("\`", "\\\`").replaceAll("$", "\\$").replaceAll(";", ";\n")}\`,
   }`
 			)
@@ -167,73 +168,95 @@ export async function generateAudio(voice_id, person, line, index) {
 	});
 }
 
+const runProcessAndParseJSON = (command, args, input) => {
+
+	return new Promise((res) => {
+
+		const process = spawn(command, args);
+
+		let output = '';
+
+		process.stdin.write(input);
+		process.stdin.end()
+
+		process.stdout.on('data', (data) => {
+			output += data.toString();
+			console.log(data.toString())
+		});
+
+		process.stderr.on('data', (data) => {
+			console.error(`stderr: ${data}`);
+		});
+
+
+
+		process.on('close', (code) => {
+			console.log(`child process exited with code ${code}`);
+			const lines = output.trim().split('\n');
+			for (let i = lines.length - 1; i >= 0; i--) {
+				const line = lines[i];
+				if (line) {
+					try {
+						res(JSON.parse(line));
+						break;
+					} catch (e) {
+						console.error("Error parsing JSON:", e);
+					}
+				}
+			}
+		})
+	})
+};
+
 async function fetchValidImages(transcript, length, ai, duration) {
 	if (ai && duration === 1) {
 		const promises = [];
 
-		for (let i = 0; i < length; i++) {
-			// var myHeaders = new Headers();
-			// myHeaders.append("Content-Type", "application/json");
-			// console.log(transcript[i].asset)
+		// for (let i = 0; i < length; i++) {
+		// var myHeaders = new Headers();
+		// myHeaders.append("Content-Type", "application/json");
+		// console.log(transcript[i].asset)
 
-			// // var raw = JSON.stringify({
-			// // 	//   "key": "",
-			// // 	"prompt": `${transcript[i].asset} realistic and clean looking`,
-			// // 	//   "negative_prompt": null,
-			// // 	"width": "720",
-			// // 	"height": "720",
-			// // 	"samples": "3",
-			// // 	"num_inference_steps": "2",
-			// // 	//   "seed": null,
-			// // 	//   "guidance_scale": 7.5,
-			// // 	"safety_checker": "no",
-			// // 	//   "multi_lingual": "no",
-			// // 	//   "panorama": "no",
-			// // 	//   "self_attention": "no",
-			// // 	//   "upscale": "no",
-			// // 	//   "embeddings_model": null,
-			// // 	//   "webhook": null,
-			// // 	//   "track_id": null
-			// // });
-			// var requestOptions = {
-			// 	headers: myHeaders,
-			// };
+		// // var raw = JSON.stringify({
+		// // 	//   "key": "",
+		// // 	"prompt": `${transcript[i].asset} realistic and clean looking`,
+		// // 	//   "negative_prompt": null,
+		// // 	"width": "720",
+		// // 	"height": "720",
+		// // 	"samples": "3",
+		// // 	"num_inference_steps": "2",
+		// // 	//   "seed": null,
+		// // 	//   "guidance_scale": 7.5,
+		// // 	"safety_checker": "no",
+		// // 	//   "multi_lingual": "no",
+		// // 	//   "panorama": "no",
+		// // 	//   "self_attention": "no",
+		// // 	//   "upscale": "no",
+		// // 	//   "embeddings_model": null,
+		// // 	//   "webhook": null,
+		// // 	//   "track_id": null
+		// // });
+		// var requestOptions = {
+		// 	headers: myHeaders,
+		// };
 
-			// const result = fetch(`http://localhost:8000?prompt=${encodeURI(transcript[i].asset + " minimalist ")}`, requestOptions)
-			// 	.then(response => response.json())
-			// 	.catch(error => console.log('error', error));
-			// promises.push(result);
+		// const result = fetch(`http://localhost:8000?prompt=${encodeURI(transcript[i].asset + " minimalist ")}`, requestOptions)
+		// 	.then(response => response.json())
+		// 	.catch(error => console.log('error', error));
+		// promises.push(result);
 
-			promises.push(new Promise((res, rej) => {
-				exec(`PROMPT='${transcript[i].asset.replace(/'/gi,"").replace(/"/gi, "") + " minimalist wide shot"}' /home/leapfrog/projects/personal/stable-diffusion-webui/venv/bin/python /home/leapfrog/projects/personal/ComfyUI/ComfyUI-to-Python-Extension/workflow_api_sd3_image.py`, async (err, stdout, stderr) => {
-					if (err) {
-						console.error(`exec error: ${err}`)
-						return
-					}
-					if (stderr) { console.log(`stderr: ${stderr}`); }
-					stdout && console.log(`stdout: ${stdout}`)
+		promises.push(new Promise(async (res, rej) => {
 
-					const val = `${stdout}`.split('\n').at(-2)
-					const parsedVal = JSON.parse(val)
-					console.log(parsedVal)
 
-					exec(`IMG_PATH='/home/leapfrog/projects/personal/ComfyUI/output/${parsedVal["paths"][0]}' /home/leapfrog/projects/personal/stable-diffusion-webui/venv/bin/python /home/leapfrog/projects/personal/ComfyUI/ComfyUI-to-Python-Extension/workflow_api.py`, async (err, stdout, stderr) => {
-						if (err) {
-							console.error(`exec error: ${err}`)
-							return
-						}
 
-						if (stderr) { console.log(`stderr: ${stderr}`); }
-						if (stdout) {
-							console.log(`stdout: ${stdout}`);
-							const val = `${stdout}`.split('\n').at(-2)
-
-							res(JSON.parse(val))
-						}
-					})
-				})
-			}))
-		}
+			// Example usage
+			const images = await runProcessAndParseJSON(`/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python`, [`/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_sd3_image.py`], transcript.map(dialogue => dialogue.asset.replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "")).join(",") + " minimalist wide shot");
+			const vids = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api.py'], images["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","))
+			
+			res(vids);
+			console.log(vids)
+		}))
+		// }
 
 		const aiImages = await Promise.all(promises);
 

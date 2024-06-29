@@ -94,14 +94,14 @@ async function main() {
 		cleanupResources();
 
 
-		exec(`python3 /home/leapfrog/projects/personal/video-generator/generate/uploadVideo.py`, async (err, stdout, stderr) => {
-			if (err) {
-				console.error(`exec error: ${err}`)
-				return
-			}
-			stdout && console.log(`stdout: ${stdout}`)
-			stderr && console.log(`stderr: ${stderr}`)
-		})
+		// exec(`python3 ./uploadVideo.py`, async (err, stdout, stderr) => {
+		// 	if (err) {
+		// 		console.error(`exec error: ${err}`)
+		// 		return
+		// 	}
+		// 	stdout && console.log(`stdout: ${stdout}`)
+		// 	stderr && console.log(`stderr: ${stderr}`)
+		// })
 	});
 
 }

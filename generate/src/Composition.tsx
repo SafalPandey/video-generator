@@ -222,7 +222,11 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	const [prevImageIdx, setPrevImageIdx] = useState<number>(0);
 	const ref = useRef<HTMLDivElement>(null);
 	const [currentSrtContent, setCurrentSrtContent] = useState<string>('');
-	const [currentAsset, setCurrentAsset] = useState<string>("");
+	const [currentAsset, setCurrentAsset] = useState<string>(subtitlesFileName[
+		currentSubtitle?.srtFileIndex
+			? currentSubtitle.srtFileIndex
+			: prevImageIdx
+	].asset);
 	// Determine the current subtitle and agent based on the frame
 	useEffect(() => {
 		if (subtitlesData.length > 0) {
@@ -274,16 +278,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 					currentTime >= subtitle.startTime && currentTime < subtitle.endTime
 			);
 			setCurrentSubtitle(current || null);
-			if (current) {
-				const newAssets = JSON.parse(subtitlesFileName[
-					current.srtFileIndex
-						? current.srtFileIndex
-						: prevImageIdx
-				].asset || "[]")
-			
-				console.log(newAssets)
-				setCurrentAsset(newAssets[0])
-			}
 		}
 	}, [frame, fps, subtitlesData]);
 	// Ensure that the delayRender handle is cleared when the component unmounts
@@ -294,6 +288,14 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 			}
 		};
 	}, [handle]);
+
+	useEffect(()=> {
+		setCurrentAsset(subtitlesFileName[
+			currentSubtitle?.srtFileIndex
+				? currentSubtitle.srtFileIndex
+				: prevImageIdx
+		].asset)
+	}, [currentSubtitle])
 
 	useEffect(() => {
 		if (currentSubtitle) {
@@ -319,7 +321,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 							</div>}
 							{/*@ts-ignore */}
 							<Img
-								src={`http://0.0.0.0:8080/${currentAsset}`
+									src={`http://0.0.0.0:8080/${currentAsset}`
 								}
 								onError={(e) => {
 									/*@ts-ignore */
