@@ -12,6 +12,7 @@ import {
 	staticFile,
 	useCurrentFrame,
 	useVideoConfig,
+	Video,
 } from 'remotion';
 import { fps, music } from './tmp/context';
 import { PaginatedSubtitles } from './Subtitles';
@@ -289,7 +290,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 		};
 	}, [handle]);
 
-	useEffect(()=> {
+	useEffect(() => {
 		setCurrentAsset(subtitlesFileName[
 			currentSubtitle?.srtFileIndex
 				? currentSubtitle.srtFileIndex
@@ -311,7 +312,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 				<Sequence from={-audioOffsetInFrames}>
 					{/*@ts-ignore */}
 					<Audio src={audioFileName} />
-					{music !== 'NONE' && <Audio volume={0.08} src={staticFile(music)} />}
+					{music !== 'NONE' && <Audio volume={0.12} src={staticFile(music)} />}
 					<div className="relative -z-20 flex flex-col w-full h-full font-remotionFont">
 						<div className="w-full h-[100%] relative">
 							{currentSubtitle?.code && <div className='text-white font-remotionFont text-3xl z-20' style={{ position: "fixed", top: "30%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal" }}>
@@ -320,27 +321,23 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								</SyntaxHighlighter>
 							</div>}
 							{/*@ts-ignore */}
-							<Img
-									src={`http://0.0.0.0:8080/${currentAsset}`
-								}
-								onError={(e) => {
-									/*@ts-ignore */
-									e.target.onerror = null; // Prevent looping if the fallback also fails
-									/*@ts-ignore */
-									e.target.src = 'https://images.smart.wtf/black.png';
-								}}
-								className="w-full h-full"
+							<Video
+								muted
+								loop={true}
+								startFrom={0}
+								key={currentAsset}
+								className=" h-full w-full object-cover"
+								src={`http://0.0.0.0:8080/${currentAsset}`}
 							/>
 							<div className="absolute bottom-2 left-2 flex flex-row gap-24 items-end h-full p-8 z-30">
 								{/*@ts-ignore */}
-								<Img
-									width={200}
-									height={200}
-									className="z-30 transition-all rounded-full"
-									// src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
-									// 	}.png`}
-									src={`http://0.0.0.0:8080/${currentAsset}`
-									}
+								<Video
+									muted
+									loop={true}
+									startFrom={0}
+									key={currentAsset}
+									className=" h-full w-full object-cover"
+									src={`http://0.0.0.0:8080/${currentAsset}`}
 								/>
 								<div
 									style={{

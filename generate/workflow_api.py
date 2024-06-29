@@ -148,7 +148,7 @@ def main(img_paths):
             svd_img2vid_conditioning_12 = svd_img2vid_conditioning.encode(
                 width=432,
                 height=768,
-                video_frames=14,
+                video_frames=25,
                 motion_bucket_id=127,
                 fps=6,
                 augmentation_level=0.2,
@@ -177,7 +177,7 @@ def main(img_paths):
 
             saveanimatedwebp_10 = saveanimatedwebp.save_images(
                 filename_prefix="ComfyUI",
-                fps=10,
+                fps=5,
                 lossless=False,
                 quality=100,
                 method="default",

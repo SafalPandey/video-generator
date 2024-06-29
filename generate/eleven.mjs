@@ -90,7 +90,7 @@ export async function generateTranscriptAudio(
 		const voice_id = VOICE_ID_MAP[person]
 
 		await generateAudio(voice_id, person, line, i);
-		console.log(images?.[0]["paths"][i], "IMAGES[0]paths[i]")
+		console.log(images?.[0]?.["paths"][i], "IMAGES[0]paths[i]")
 		audios.push({
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
@@ -98,7 +98,7 @@ export async function generateTranscriptAudio(
 			code,
 			images:
 				ai && duration === 1
-					? images?.[0]?.["paths"]?.[i] || 'https://images.smart.wtf/black.png'
+					? images?.[0]?.["paths"][i] || 'https://images.smart.wtf/black.png'
 					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` 
 					: images?.[0] || 'https://images.smart.wtf/black.png',
 		});
@@ -200,6 +200,7 @@ const runProcessAndParseJSON = (command, args, input) => {
 						res(JSON.parse(line));
 						break;
 					} catch (e) {
+						res(line)
 						console.error("Error parsing JSON:", e);
 					}
 				}
@@ -250,11 +251,28 @@ async function fetchValidImages(transcript, length, ai, duration) {
 
 
 			// Example usage
-			const images = await runProcessAndParseJSON(`/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python`, [`/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_sd3_image.py`], transcript.map(dialogue => dialogue.asset.replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "")).join(",") + " minimalist wide shot");
+			const images = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_sd3_image.py'], transcript.map(dialogue => dialogue.asset.replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "")).join(",") + " minimalist wide shot");
 			const vids = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api.py'], images["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","))
-			
-			res(vids);
-			console.log(vids)
+
+			const mp4s = { "paths": [] }
+			const arr = vids["paths"]
+
+			for (let vid of arr) {
+				const newVid = `${vid.split(".")[0]}.mp4`
+				console.log(vid)
+				await new Promise(res => exec(`magick convert /Users/safalpandey/projects/personal/ComfyUI/output/${vid}  /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
+					if (err) {
+						console.error("err", err)
+					}
+					stderr && console.log(stderr);
+					stdout && console.log("stdout", stdout)
+					mp4s["paths"] = [...mp4s["paths"], newVid]
+					res()
+				}))
+
+			}
+			console.log("asd", mp4s)
+			res(mp4s);
 		}))
 		// }
 
