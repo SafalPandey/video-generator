@@ -82,13 +82,15 @@ async function main() {
 		cleanSrt
 	);
 
+	const filename=`${videoTitle.replaceAll("'", "").replaceAll("\"", "").replaceAll(" ", "_")}.mp4`
+
 	// run in the command line `npm run build`
-	exec(`npm run build out/${videoTitle.replaceAll("'", "").replaceAll("\"", "").replaceAll(" ", "_")}.mp4`, async (error, stdout, stderr) => {
+	exec(`npm run build out/${filename}`, async (error, stdout, stderr) => {
 		if (error) {
 			console.error(`exec error: ${error}`);
 			return;
 		}
-		console.log(`stdout: ${stdout}`);
+		console.log(`Finished build! ${filename} produced.`);
 		console.error(`stderr: ${stderr}`);
 
 		cleanupResources();

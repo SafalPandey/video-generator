@@ -321,23 +321,27 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								</SyntaxHighlighter>
 							</div>}
 							{/*@ts-ignore */}
-							<Video
-								muted
-								loop={true}
-								startFrom={0}
-								key={currentAsset}
-								className=" h-full w-full object-cover"
-								src={`http://0.0.0.0:8080/${currentAsset}`}
+							<Img
+								src={`http://0.0.0.0:8080/${currentAsset}`
+								}
+								onError={(e) => {
+									/*@ts-ignore */
+									e.target.onerror = null; // Prevent looping if the fallback also fails
+									/*@ts-ignore */
+									e.target.src = 'https://images.smart.wtf/black.png';
+								}}
+								className="w-full h-full"
 							/>
 							<div className="absolute bottom-2 left-2 flex flex-row gap-24 items-end h-full p-8 z-30">
 								{/*@ts-ignore */}
-								<Video
-									muted
-									loop={true}
-									startFrom={0}
-									key={currentAsset}
-									className=" h-full w-full object-cover"
-									src={`http://0.0.0.0:8080/${currentAsset}`}
+								<Img
+									width={200}
+									height={200}
+									className="z-30 transition-all rounded-full"
+									// src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
+									// 	}.png`}
+									src={`http://0.0.0.0:8080/${currentAsset}`
+									}
 								/>
 								<div
 									style={{

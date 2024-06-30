@@ -252,25 +252,33 @@ async function fetchValidImages(transcript, length, ai, duration) {
 
 			// Example usage
 			const images = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_sd3_image.py'], transcript.map(dialogue => dialogue.asset.replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "")).join(",") + " minimalist wide shot");
-			const vids = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api.py'], images["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","))
+			// const vids = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api.py'], {"paths": ["ComfyUI_00159_.png", "ComfyUI_00160_.png", "ComfyUI_00161_.png", "ComfyUI_00162_.png", "ComfyUI_00163_.png", "ComfyUI_00164_.png"]}["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","))
 
-			const mp4s = { "paths": [] }
-			const arr = vids["paths"]
+			const mp4s = images
+			// { "paths": [] }
+			// const arr = [
+			// 	'ComfyUI_00165_.mp4',
+			// 	'ComfyUI_00166_.mp4',
+			// 	'ComfyUI_00167_.mp4',
+			// 	'ComfyUI_00168_.mp4',
+			// 	'ComfyUI_00169_.mp4',
+			// 	'ComfyUI_00170_.mp4'
+			//   ]
 
-			for (let vid of arr) {
-				const newVid = `${vid.split(".")[0]}.mp4`
-				console.log(vid)
-				await new Promise(res => exec(`magick convert /Users/safalpandey/projects/personal/ComfyUI/output/${vid}  /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
-					if (err) {
-						console.error("err", err)
-					}
-					stderr && console.log(stderr);
-					stdout && console.log("stdout", stdout)
-					mp4s["paths"] = [...mp4s["paths"], newVid]
-					res()
-				}))
+			// for (let vid of arr) {
+			// 	const newVid = `${vid.split(".")[0]}.mp4`
+			// 	console.log(vid)
+			// 	await new Promise(res => exec(`magick /Users/safalpandey/projects/personal/ComfyUI/output/${vid}  /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
+			// 		if (err) {
+			// 			console.error("err", err)
+			// 		}
+			// 		stderr && console.log(stderr);
+			// 		stdout && console.log("stdout", stdout)
+			// 		mp4s["paths"] = [...mp4s["paths"], newVid]
+			// 		res()
+			// 	}))
 
-			}
+			// }
 			console.log("asd", mp4s)
 			res(mp4s);
 		}))

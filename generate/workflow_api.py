@@ -159,7 +159,7 @@ def main(img_paths):
 
             ksampler_3 = ksampler.sample(
                 seed=391247136435487,
-                steps=30,
+                steps=15,
                 cfg=2.5,
                 sampler_name="euler",
                 scheduler="karras",
@@ -177,7 +177,7 @@ def main(img_paths):
 
             saveanimatedwebp_10 = saveanimatedwebp.save_images(
                 filename_prefix="ComfyUI",
-                fps=5,
+                fps=10,
                 lossless=False,
                 quality=100,
                 method="default",
