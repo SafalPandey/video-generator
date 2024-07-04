@@ -15,7 +15,7 @@ const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY,
 });
 
-const VOICE_ID_MAP = {
+export const VOICE_ID_MAP = {
 	'JOE_ROGAN': 'joe-rogan',
 	'KANYE_WEST': 'kanye-west',
 	'BEN_SHAPIRO': 'ben-shapiro',
@@ -34,7 +34,7 @@ const VOICE_ID_MAP = {
 	'BILL_GATES': 'bill-gates',
 	'DARTH_VADER': 'darth-vader',
 	'BEYONCE': 'beyonce',
-	'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I': 'sam-altman',
+	'SAM_ALTMAN': 'sam-altman',
 	'JORDAN_PETERSON': 'jordan-peterson'
 }
 
@@ -46,7 +46,6 @@ export async function generateTranscriptAudio(
 	ai,
 	fps,
 	duration,
-	background,
 	music,
 	videoId
 ) {
@@ -113,9 +112,6 @@ export const music: string = ${music === 'NONE' ? `'NONE'` : `'/music/${music}.M
 		};
 export const fps = ${fps};
 export const initialAgentName = '${initialAgentName}';
-export const videoFileName = '/background/${background}-' + ${Math.floor(
-			Math.random() * 10
-		)} + '.mp4';
 export const subtitlesFileName = [
   ${audios
 			.map(

@@ -109,7 +109,6 @@ const SubtitleFileSchema = z.object({
 export const AudioGramSchema = z.object({
 	initialAgentName: z.string(),
 	agentDetails: AgentDetailsSchema,
-	videoFileName: z.string(),
 	durationInSeconds: z.number().positive(),
 	audioOffsetInSeconds: z.number().min(0),
 	subtitlesFileName: z.array(SubtitleFileSchema),
@@ -202,7 +201,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 	subtitlesLineHeight,
 	mirrorWave,
 	audioOffsetInSeconds,
-	videoFileName,
 }) => {
 	const [currentAgentName, setCurrentAgentName] = useState<string>('');
 	const { durationInFrames, fps } = useVideoConfig();
@@ -312,7 +310,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 				<Sequence from={-audioOffsetInFrames}>
 					{/*@ts-ignore */}
 					<Audio src={audioFileName} />
-					{music !== 'NONE' && <Audio volume={0.12} src={staticFile(music)} />}
+					{music !== 'NONE' && <Audio volume={0.25} src={staticFile(music)} />}
 					<div className="relative -z-20 flex flex-col w-full h-full font-remotionFont">
 						<div className="w-full h-[100%] relative">
 							{currentSubtitle?.code && <div className='text-white font-remotionFont text-3xl z-20' style={{ position: "fixed", top: "30%", left: "10%", width: "80%", height: "46%", overflowWrap: "normal" }}>

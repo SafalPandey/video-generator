@@ -72,7 +72,6 @@ export default async function transcribeFunction(
 	aiGeneratedImages,
 	fps,
 	duration,
-	background,
 	music,
 	cleanSrt,
 	videoId
@@ -85,7 +84,6 @@ export default async function transcribeFunction(
 		aiGeneratedImages,
 		fps,
 		duration,
-		background,
 		music,
 		videoId
 	);

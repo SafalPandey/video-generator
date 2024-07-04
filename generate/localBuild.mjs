@@ -1,9 +1,9 @@
 import transcribeFunction from './transcribe.mjs';
 import path from 'path';
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import { topics } from './topics.mjs';
-import { rm, mkdir, unlink } from 'fs/promises';
-
+import { rm, mkdir, unlink, readdir } from 'fs/promises';
+import { VOICE_ID_MAP } from './eleven.mjs'
 export const PROCESS_ID = 0;
 
 function getRandomElement(elements) {
@@ -15,12 +15,8 @@ async function cleanupResources() {
 	try {
 		await rm(path.join('public', 'srt'), { recursive: true, force: true });
 		await rm(path.join('public', 'voice'), { recursive: true, force: true });
-		await unlink(path.join('public', `audio-${PROCESS_ID}.mp3`)).catch((e) =>
-			console.error(e)
-		);
-		await unlink(path.join('src', 'tmp', 'context.tsx')).catch((e) =>
-			console.error(e)
-		);
+		await unlink(path.join('public', `audio-${PROCESS_ID}.mp3`)).catch((e) => { });
+		await unlink(path.join('src', 'tmp', 'context.tsx')).catch((e) => { });
 		await mkdir(path.join('public', 'srt'), { recursive: true });
 		await mkdir(path.join('public', 'voice'), { recursive: true });
 	} catch (err) {
@@ -34,24 +30,56 @@ const agents = [
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',
 	// 'ALEX_JONES',
-	// 'BEN_AFFLECK',
+	'BEN_AFFLECK',
 	'DRAKE',
 	'ELON_MUSK',
 	'JUSTIN_BIEBER',
-	// 'LEX_FRIDMAN',
-	// 'ROBERT_DOWNEY_JR',
-	// 'BILL_GATES',
-	// 'ARTIFICIAL_GENERAL_INTELLIGENCE aka A.G.I',
+	'LEX_FRIDMAN',
+	'ROBERT_DOWNEY_JR',
+	'BILL_GATES',
+	'SAM_ALTMAN',
 	'DONALD_TRUMP',
 	'MARK_ZUCKERBERG',
 	'JOE_BIDEN',
 	// 'LIL_WAYNE',
 	'ANDREW_TATE',
+	'BEYONCE'
 ];
+
+function validateAgentToVoiceIdMap() {
+	if (!agents.every(a => VOICE_ID_MAP[a])) {
+		throw new Error(`Some agents have missing voice Id in ./eleven.mjs. Please add proper voice id for newly added agents. Missing voice_id for: ${agents.filter(a => !VOICE_ID_MAP[a])}`)
+	}
+}
 
 const local = true;
 
+
+const runProcess = (command, args, input, pipe = false) => {
+	return new Promise(() => {
+
+		const childProcess = spawn(command, args);
+
+		let output = '';
+
+		childProcess.stdin.write(input);
+		childProcess.stdin.end();
+
+		if (pipe) {
+			childProcess.stdout.pipe(process.stdout)
+		}
+		childProcess.stderr.pipe(process.stderr)
+
+		childProcess.on('close', (code) => {
+			console.log(`child process exited with code ${code}`);
+		})
+	})
+};
+
 async function main() {
+	validateAgentToVoiceIdMap();
+
+	await cleanupResources()
 	// const randomTopic = topics[Math.floor(Math.random() * topics.length)];
 	const promptedTopic = process.argv.slice(2).join(" ");
 
@@ -65,8 +93,8 @@ async function main() {
 	const fps = 60;
 	const duration = 1; //minute
 	//MINECRAFT or TRUCK or GTA
-	const background = Math.random() < 0.5 ? 'GTA' : "GTA";
-	const music = getRandomElement(['WII_SHOP_CHANNEL_TRAP', 'FLUFFING_A_DUCK', 'MONKEYS_SPINNING_MONKEYS']);
+	const files = await readdir('./public/music')
+	const music = getRandomElement(files.map(file => file.split(".")[0]));
 	const cleanSrt = false;
 
 	const videoTitle = await transcribeFunction(
@@ -77,37 +105,20 @@ async function main() {
 		aiGeneratedImages,
 		fps,
 		duration,
-		background,
 		music,
 		cleanSrt
 	);
 
-	const filename=`${videoTitle.replaceAll("'", "").replaceAll("\"", "").replaceAll(" ", "_")}.mp4`
+	const filename = `${videoTitle.replaceAll("'", "").replaceAll("\"", "").replaceAll(" ", "_")}.mp4`
 
 	// run in the command line `npm run build`
-	exec(`npm run build out/${filename}`, async (error, stdout, stderr) => {
-		if (error) {
-			console.error(`exec error: ${error}`);
-			return;
-		}
-		console.log(`Finished build! ${filename} produced.`);
-		console.error(`stderr: ${stderr}`);
+	await runProcess(`npm`, [`run`, 'build', `out/${filename}`], "", false)
+	await cleanupResources();
 
-		cleanupResources();
-
-
-		// exec(`python3 ./uploadVideo.py`, async (err, stdout, stderr) => {
-		// 	if (err) {
-		// 		console.error(`exec error: ${err}`)
-		// 		return
-		// 	}
-		// 	stdout && console.log(`stdout: ${stdout}`)
-		// 	stderr && console.log(`stderr: ${stderr}`)
-		// })
-	});
-
+	return filename;
 }
 
 (async () => {
 	await main();
+	console.log("VIDEO PRODUCED:", filename);
 })();
