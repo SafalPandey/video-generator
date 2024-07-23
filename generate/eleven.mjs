@@ -1,6 +1,6 @@
-import { spawn } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import fetch from 'node-fetch';
-import fs from 'fs';
+import fs, { writeFileSync } from 'fs';
 import { exec } from 'child_process';
 import dotenv from 'dotenv';
 import transcriptFunction from './transcript.mjs';
@@ -89,7 +89,7 @@ export async function generateTranscriptAudio(
 		const voice_id = VOICE_ID_MAP[person]
 
 		await generateAudio(voice_id, person, line, i);
-		console.log(images?.[0]?.["paths"][i], "IMAGES[0]paths[i]")
+		console.log(images?.["paths"][i], "IMAGES.paths[i]")
 		audios.push({
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
@@ -97,9 +97,9 @@ export async function generateTranscriptAudio(
 			code,
 			images:
 				ai && duration === 1
-					? images?.[0]?.["paths"][i] || 'https://images.smart.wtf/black.png'
-					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images?.[0]}` 
-					: images?.[0] || 'https://images.smart.wtf/black.png',
+					? images?.["paths"][i] || 'https://images.smart.wtf/black.png'
+					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images}`
+					: images || 'https://images.smart.wtf/black.png',
 		});
 	}
 
@@ -198,6 +198,7 @@ const runProcessAndParseJSON = (command, args, input) => {
 					} catch (e) {
 						res(line)
 						console.error("Error parsing JSON:", e);
+						throw new Error('Oopsie... ' + e);
 					}
 				}
 			}
@@ -247,40 +248,36 @@ async function fetchValidImages(transcript, length, ai, duration) {
 
 
 			// Example usage
-			const images = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_sd3_image.py'], transcript.map(dialogue => dialogue.asset.replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "")).join(",") + " minimalist wide shot");
-			// const vids = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api.py'], {"paths": ["ComfyUI_00159_.png", "ComfyUI_00160_.png", "ComfyUI_00161_.png", "ComfyUI_00162_.png", "ComfyUI_00163_.png", "ComfyUI_00164_.png"]}["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","))
+			const images = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_sd3_image.py'], transcript.map(dialogue => `${(dialogue.asset || "").replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "")} minimalist wide shot`).join(","));
+			console.log({ images }, typeof images)
+			const vids = await runProcessAndParseJSON('/Users/safalpandey/projects/personal/ComfyUI/venv/bin/python', ['/Users/safalpandey/projects/personal/brainrot.js/generate/workflow_api_svd_video.py'], images["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","))
 
-			const mp4s = images
-			// { "paths": [] }
-			// const arr = [
-			// 	'ComfyUI_00165_.mp4',
-			// 	'ComfyUI_00166_.mp4',
-			// 	'ComfyUI_00167_.mp4',
-			// 	'ComfyUI_00168_.mp4',
-			// 	'ComfyUI_00169_.mp4',
-			// 	'ComfyUI_00170_.mp4'
-			//   ]
+			const mp4s = { "paths": [] }
+			console.log(vids)
+			const parsedVids = vids["paths"]
+			console.log(parsedVids)
+			for (let vid of parsedVids) {
+				const newVid = `${vid.split(".")[0]}.mp4`
+				console.log(vid)
+				await new Promise(res => exec(`magick /Users/safalpandey/projects/personal/ComfyUI/output/${vid}  /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
+					if (err) {
+						console.error("err", err)
+					}
+					stderr && console.log(stderr);
+					stdout && console.log("stdout", stdout)
+					mp4s["paths"] = [...mp4s["paths"], newVid]
+					res()
+				}))
+			}
 
-			// for (let vid of arr) {
-			// 	const newVid = `${vid.split(".")[0]}.mp4`
-			// 	console.log(vid)
-			// 	await new Promise(res => exec(`magick /Users/safalpandey/projects/personal/ComfyUI/output/${vid}  /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
-			// 		if (err) {
-			// 			console.error("err", err)
-			// 		}
-			// 		stderr && console.log(stderr);
-			// 		stdout && console.log("stdout", stdout)
-			// 		mp4s["paths"] = [...mp4s["paths"], newVid]
-			// 		res()
-			// 	}))
-
-			// }
+			// writeFileSync('/Users/safalpandey/projects/personal/brainrot.js/generate/src/tmp/vid_files.txt', mp4s["paths"].map(filename => `file '/Users/safalpandey/projects/personal/ComfyUI/output/${filename}'`).join("\n"))
+			// execSync(`ffmpeg -f concat -i /Users/safalpandey/projects/personal/brainrot.js/generate/src/tmp/vid_files -c copy /Users/safalpandey/projects/personal/brainrot.js/generate/src/tmp/finalVid.mp4`)
 			console.log("asd", mp4s)
 			res(mp4s);
 		}))
 		// }
 
-		const aiImages = await Promise.all(promises);
+		const [aiImages] = await Promise.all(promises);
 
 		return aiImages;
 	} else {

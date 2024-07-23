@@ -146,11 +146,11 @@ def main(img_paths):
             loadimage_23 = loadimage.load_image(image=img_path)
 
             svd_img2vid_conditioning_12 = svd_img2vid_conditioning.encode(
-                width=432,
-                height=768,
+                width=412,
+                height=783,
                 video_frames=25,
                 motion_bucket_id=127,
-                fps=6,
+                fps=8,
                 augmentation_level=0.2,
                 clip_vision=get_value_at_index(imageonlycheckpointloader_15, 1),
                 init_image=get_value_at_index(loadimage_23, 0),
@@ -158,7 +158,7 @@ def main(img_paths):
             )
 
             ksampler_3 = ksampler.sample(
-                seed=391247136435487,
+                seed=random.randint(1, 2**64),
                 steps=15,
                 cfg=2.5,
                 sampler_name="euler",
@@ -177,7 +177,7 @@ def main(img_paths):
 
             saveanimatedwebp_10 = saveanimatedwebp.save_images(
                 filename_prefix="ComfyUI",
-                fps=10,
+                fps=8,
                 lossless=False,
                 quality=100,
                 method="default",
@@ -199,20 +199,20 @@ def main(img_paths):
                 # # Send JSON data
                 # self.wfile.write(json_response.encode())
 
-        return saveanimatedwebp_10
+        # return saveanimatedwebp_10
 
-        PORT=8001
-        with socketserver.TCPServer(("", PORT), Handler) as httpd:
-            print("Serving at port", PORT)
+        # PORT=8001
+        # with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        #     print("Serving at port", PORT)
 
-            server_started = False
-            while (not server_started):
-                try:
-                    httpd.serve_forever()
-                    server_started = True
-                except Exception as e:
-                    print(e)
-                    sleep(10)
+        #     server_started = False
+        #     while (not server_started):
+        #         try:
+        #             httpd.serve_forever()
+        #             server_started = True
+        #         except Exception as e:
+        #             print(e)
+        #             sleep(10)
 
 if __name__ == "__main__":
     img_paths = input()

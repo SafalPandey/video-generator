@@ -4,7 +4,6 @@ import './style.css';
 import {
 	initialAgentName,
 	subtitlesFileName,
-	videoFileName,
 	fps,
 } from './tmp/context';
 import { getAudioDurationInSeconds } from '@remotion/media-utils';
@@ -33,7 +32,6 @@ export const RemotionRoot: React.FC = () => {
 
 					// Subtitles settings
 					subtitlesFileName,
-					videoFileName,
 					agentDetails: {
 						JOE_ROGAN: {
 							color: '#bc462b',

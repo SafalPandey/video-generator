@@ -168,7 +168,7 @@ def main(prompts):
             )
 
             ksampler_3 = ksampler.sample(
-                seed=2**63,
+                seed=random.randint(1, 2**64),
                 steps=30,
                 cfg=5.45,
                 sampler_name="euler",
@@ -206,20 +206,14 @@ def main(prompts):
 
         return saveimage_9
 
-        with socketserver.TCPServer(("", PORT), Handler) as httpd:
-            print("Serving at port", PORT)
-
-            server_started = False
-            while not server_started:
-                try:
-                    httpd.serve_forever()
-                    server_started = True
-                except Exception as e:
-                    print(e)
-                    sleep(10)
-
 
 if __name__ == "__main__":
-    prompts = input()
-    print("received prompts:", prompts.split(","))
-    main(prompts)
+    raw_prompts = input()
+    prompts = raw_prompts.split(",")
+
+    print("========================================================")
+    print("THE PROMPT LENGTH IS HERE =============>>>>>>>>>>>", len(prompts))
+    print("========================================================")
+
+    print("received prompts:", prompts)
+    main(raw_prompts)
