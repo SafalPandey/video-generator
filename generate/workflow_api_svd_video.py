@@ -150,8 +150,8 @@ def main(img_paths):
                 height=783,
                 video_frames=25,
                 motion_bucket_id=127,
-                fps=8,
-                augmentation_level=0.2,
+                fps=15,
+                augmentation_level=0,
                 clip_vision=get_value_at_index(imageonlycheckpointloader_15, 1),
                 init_image=get_value_at_index(loadimage_23, 0),
                 vae=get_value_at_index(imageonlycheckpointloader_15, 2),
@@ -159,7 +159,7 @@ def main(img_paths):
 
             ksampler_3 = ksampler.sample(
                 seed=random.randint(1, 2**64),
-                steps=15,
+                steps=10,
                 cfg=2.5,
                 sampler_name="euler",
                 scheduler="karras",
@@ -177,7 +177,7 @@ def main(img_paths):
 
             saveanimatedwebp_10 = saveanimatedwebp.save_images(
                 filename_prefix="ComfyUI",
-                fps=8,
+                fps=15,
                 lossless=False,
                 quality=100,
                 method="default",

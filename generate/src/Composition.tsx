@@ -6,8 +6,6 @@ import {
 	AbsoluteFill,
 	Audio,
 	continueRender,
-	Img,
-
 	Loop,
 
 	OffthreadVideo,
@@ -324,7 +322,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								</SyntaxHighlighter>
 							</div>}
 							{/*@ts-ignore */}
-							<Loop durationInFrames={4 * fps}>
+							<Loop durationInFrames={3 * fps}>
 
 								<OffthreadVideo
 									muted
@@ -340,24 +338,15 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								/>
 							</Loop>
 
-							<div className="absolute bottom-2 left-2 flex flex-row gap-24 items-end h-full p-8 z-30">
+							<div className="absolute bottom-2 left-2 flex flex-row gap-50 items-end h-full p-8 z-30" style={{height: "20%"}}>
 								{/*@ts-ignore */}
-								<Img
-									width={200}
-									height={200}
-									className="z-30 transition-all rounded-full"
-									// src={`https://images.smart.wtf/${currentAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : currentAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : currentAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : currentAgentName || initialAgentName === "KANYE_WEST" ? "BARACK_OBAMA" : initialAgentName === "LIL_WAYNE" ? "LIL_YATCHY" : initialAgentName === "ANDREW_TATE" ? "RICK_SANCHEZ" : initialAgentName
-									// 	}.png`}
-									src={`http://0.0.0.0:8080/${currentAsset.split(".")[0]}.webp`
-									}
-								/>
 								<div
 									style={{
 										lineHeight: `${subtitlesLineHeight}px`,
 										textShadow: '4px 4px 0px #000000',
 										WebkitTextStroke: '2px black',
 									}}
-									className="font-remotionFont z-10 absolute text-center text-8xl drop-shadow-2xl text-white mx-24 top-8 left-0 right-0"
+									className="font-remotionFont z-10 absolute text-center text-8xl drop-shadow-2xl text-white mx-24 top-0 left-0 right-0"
 								>
 									<PaginatedSubtitles
 										subtitles={currentSrtContent.toUpperCase()}
