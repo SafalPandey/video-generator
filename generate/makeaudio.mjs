@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import { VGEN_AUDIO_GENERATOR_MODEL_NAME } from './env.mjs';
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ export async function generateAudio(voice_id, person, line, index) {
 			text: line,
 			voice_id: voice_id,
 			params: {
-				model: 'ar-diff-50k',
+				model: VGEN_AUDIO_GENERATOR_MODEL_NAME || 'ar-diff-50k',
 			},
 		}),
 	});

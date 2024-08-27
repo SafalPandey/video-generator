@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { writeFile } from 'fs/promises';
+import { VGEN_CLEAN_SRT_GENERATOR_MODEL_NAME } from './env.mjs';
 
 dotenv.config();
 
@@ -72,7 +73,7 @@ ${srt}`,
 					content: "follow the system prompt accurately!"
 				}
 			],
-			model: 'llama3:8b-instruct-q8_0',
+			model: VGEN_CLEAN_SRT_GENERATOR_MODEL_NAME || 'llama3:8b-instruct-q8_0',
 		})
 	});
 

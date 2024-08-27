@@ -185,12 +185,14 @@ def main(prompts):
                 vae=get_value_at_index(checkpointloadersimple_4, 2),
             )
 
+            # what are my options below?
             saveimage_9 = saveimage.save_images(
                 filename_prefix="ComfyUI", images=get_value_at_index(vaedecode_8, 0)
             )
 
             # Serialize dictionary to JSON
-            response["paths"]= response["paths"] + [x["filename"] for x in saveimage_9["ui"]["images"]]
+            response["paths"] = response["paths"] + [x["filename"] 
+                for x in saveimage_9["ui"]["images"]]
 
             
         json_response=json.dumps(response)

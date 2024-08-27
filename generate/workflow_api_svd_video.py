@@ -124,13 +124,10 @@ def main(img_paths):
 
         loadimage = LoadImage()
         svd_img2vid_conditioning = NODE_CLASS_MAPPINGS["SVD_img2vid_Conditioning"]()
-
-
         videolinearcfgguidance = NODE_CLASS_MAPPINGS["VideoLinearCFGGuidance"]()
         ksampler = KSampler()
         vaedecode = VAEDecode()
         saveanimatedwebp = NODE_CLASS_MAPPINGS["SaveAnimatedWEBP"]()
-
         videolinearcfgguidance_14 = videolinearcfgguidance.patch(
             min_cfg=1, model=get_value_at_index(imageonlycheckpointloader_15, 0)
         )
@@ -174,7 +171,6 @@ def main(img_paths):
                 samples=get_value_at_index(ksampler_3, 0),
                 vae=get_value_at_index(imageonlycheckpointloader_15, 2),
             )
-
             saveanimatedwebp_10 = saveanimatedwebp.save_images(
                 filename_prefix="ComfyUI",
                 fps=15,
@@ -183,9 +179,9 @@ def main(img_paths):
                 method="default",
                 images=get_value_at_index(vaedecode_8, 0),
             )
+            response["paths"]= response["paths"] + [x["filename"]
+                for x in saveanimatedwebp_10["ui"]["images"]]
 
-            # print(saveanimatedwebp_10)
-            response["paths"]= response["paths"] + [x["filename"] for x in saveanimatedwebp_10["ui"]["images"]]
         json_response = json.dumps(
             response
         )

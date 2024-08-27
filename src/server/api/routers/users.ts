@@ -16,6 +16,8 @@ import { absoluteUrl } from "@/lib/utils";
 import { getUserSubscriptionPlan, stripe } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
 
+import { VGEN_CREATE_VIDEO_GENERATOR_MODEL_NAME } from "../../../../generate/env.mjs";
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -248,7 +250,7 @@ export const userRouter = createTRPCRouter({
       }) => {
         try {
           const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo-1106",
+            model: VGEN_CREATE_VIDEO_GENERATOR_MODEL_NAME || "gpt-3.5-turbo-1106",
             messages: [
               {
                 role: "system",
