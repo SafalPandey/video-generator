@@ -1,4 +1,4 @@
-import transcribeFunction from './transcribe.mjs';
+import generateVideoContext from './transcribe.mjs';
 import { rm, mkdir, unlink } from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -59,7 +59,7 @@ async function mainFn(
 			[PROCESS_ID, videoId]
 		);
 
-		await transcribeFunction(
+		await generateVideoContext(
 			local,
 			topic,
 			agentA,

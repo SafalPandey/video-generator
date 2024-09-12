@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import fs, { writeFileSync } from 'fs';
 import { exec } from 'child_process';
 import dotenv from 'dotenv';
-import transcriptFunction from './transcript.mjs';
+import getTranscriptAndTitle from './transcript.mjs';
 import { writeFile } from 'fs/promises';
 import { query } from './dbClient.mjs';
 
@@ -39,73 +39,35 @@ export const VOICE_ID_MAP = {
 	'JORDAN_PETERSON': 'jordan-peterson'
 }
 
-export async function generateTranscriptAudio(
-	local,
+export async function generateVideoContents(
 	topic,
 	agentA,
 	agentB,
-	ai,
 	fps,
-	duration,
 	music,
-	videoId
 ) {
-	if (!local) {
-		await query(
-			"UPDATE `pending-videos` SET status = 'Generating transcript', progress = 0 WHERE video_id = ?",
-			[videoId]
-		);
-	}
-
-	let { transcript, videoTitle } = await transcriptFunction(topic, agentA, agentB, duration);
-	transcript = JSON.parse(transcript).transcript
+	const { transcript, videoTitle } = await getTranscriptAndTitle(topic, agentA, agentB);
 	console.log(transcript, typeof transcript)
-	const audios = [];
+	const videoContents = [];
 
-	if (!local) {
-		await query(
-			"UPDATE `pending-videos` SET status = 'Fetching images', progress = 5 WHERE video_id = ?",
-			[videoId]
-		);
-	}
+	const images = await generateImagesFromTranscript(transcript);
 
-	const images = await fetchValidImages(
-		transcript,
-		transcript.length,
-		ai,
-		duration
-	);
-
-	if (!local) {
-		await query(
-			"UPDATE `pending-videos` SET status = 'Generating audio', progress = 12 WHERE video_id = ?",
-			[videoId]
-		);
-	}
-
-	for (let i = 0; i < transcript.length; i++) {
-		const person = transcript[i].person;
-		const line = transcript[i].line;
-		const code = transcript[i].code;
-
+	for (const { person, line, code } of transcript) {
 		const voice_id = VOICE_ID_MAP[person]
 
-		await generateAudio(voice_id, person, line, i);
-		console.log(images?.["paths"][i], "IMAGES.paths[i]")
-		audios.push({
+		await generateAudioAndSrt(voice_id, person, line, i);
+		console.log(i + 1, images?.["paths"][i])
+		videoContents.push({
 			person: person,
 			audio: `public/voice/${person}-${i}.mp3`,
 			index: i,
 			code,
-			images:
-				ai && duration === 1
-					? images?.["paths"][i] || 'https://images.smart.wtf/black.png'
-					// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images}`
-					: images || 'https://images.smart.wtf/black.png',
+			images: images?.["paths"][i] || 'https://images.smart.wtf/black.png'
+			// && `data:image/jpeg;charset=utf-8;base64, ${images?.[i]?.images}`
 		});
 	}
 
-	const initialAgentName = audios[0].person;
+	const initialAgentName = videoContents[0].person;
 
 	const contextContent = `
 import { staticFile } from 'remotion';
@@ -115,7 +77,7 @@ export const music: string = ${music === 'NONE' ? `'NONE'` : `'/music/${music}.M
 export const fps = ${fps};
 export const initialAgentName = '${initialAgentName}';
 export const subtitlesFileName = [
-  ${audios
+  ${videoContents
 			.map(
 				(entry, i) => `{
     name: '${entry.person}',
@@ -130,10 +92,10 @@ export const subtitlesFileName = [
 
 	await writeFile('src/tmp/context.tsx', contextContent, 'utf-8');
 
-	return { audios, transcript, videoTitle };
+	return { audios: videoContents, transcript, videoTitle };
 }
 
-export async function generateAudio(voice_id, person, line, index) {
+export async function generateAudioAndSrt(voice_id, person, line, index) {
 	const response = await fetch('https://api.neets.ai/v1/tts', {
 		method: 'POST',
 		headers: {
@@ -167,28 +129,25 @@ export async function generateAudio(voice_id, person, line, index) {
 }
 
 const runProcessAndParseJSON = (command, args, input) => {
-
 	return new Promise((res) => {
-
-		const process = spawn(command, args);
+		const subProcess = spawn(command, args);
 
 		let output = '';
 
-		process.stdin.write(input);
-		process.stdin.end()
-
-		process.stdout.on('data', (data) => {
+		subProcess.stdin.write(input);
+		subProcess.stdin.end()
+		process.stdout.pipe(process.stdout);
+		subProcess.stdout.on('data', (data) => {
 			output += data.toString();
-			console.log('stdout', data.toString())
 		});
 
-		process.stderr.on('data', (data) => {
+		subProcess.stderr.on('data', (data) => {
 			console.error(`stderr: ${data}`);
 		});
 
 
 
-		process.on('close', (code) => {
+		subProcess.on('close', (code) => {
 			console.log(`child process exited with code ${code}`);
 			const lines = output.trim().split('\n');
 			for (let i = lines.length - 1; i >= 0; i--) {
@@ -208,168 +167,75 @@ const runProcessAndParseJSON = (command, args, input) => {
 	})
 };
 
-async function fetchValidImages(transcript, length, ai, duration) {
+async function generateImagesFromTranscript(transcript) {
 	// Function to process the asset description
 	const processDescription = (description) => {
 		// Remove unwanted characters from the description
 		let assetDescription = (description || "").replace(/'/gi, "").replace(/"/gi, "").replace(/,/gi, "");
 
 		// List of keywords related to hands and their root forms
-		const handKeywords = {
-			"hand": "hand",
-			"thumb": "thumb",
-			"pointing": "point",
-			"cooking": "cook",
-			"holding": "hold",
-			"grabbing": "grab",
-			"fingers": "finger",
-			"gesturing": "gesture"
-		};
+		const handRelatedKeywords = [
+			"hand",
+			"thumb",
+			"point",
+			"cook",
+			"hold",
+			"grab",
+			"finger",
+			"gesture",
+			"pointing",
+			"cooking",
+			"holding",
+			"grabbing",
+			"fingers",
+			"gesturing"
+		]
 
 		// Remove any keywords related to hands from the description
-		Object.keys(handKeywords).forEach(keyword => {
+		Object.keys(handRelatedKeywords).forEach(keyword => {
 			const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-			assetDescription = assetDescription.replace(regex, handKeywords[keyword]);
+			assetDescription = assetDescription.replace(regex, "");
 		});
 
 		// Add the specified style to the prompt
 		return `${assetDescription} wide shot in the style of Alice in Wonderland movie Johnny Depp art style`;
 	};
 
-	// Check if AI processing is enabled and duration is 1
-	if (ai && duration === 1) {
-		const promises = [];
-		// Create a new promise for AI image processing
-		promises.push(new Promise(async (res, rej) => {
-			// Run the Python script to generate images
-			const images = await runProcessAndParseJSON('python', ['workflow_api_sd3_image.py'], transcript.map(dialogue => processDescription(dialogue.asset)).join(","));
+	const aiImages = await new Promise(async (res) => {
+		console.log(transcript, typeof transcript)
+		// Run the Python script to generate images
+		const images = await runProcessAndParseJSON('python', ['workflow_api_sd3_image.py'], transcript.map(dialogue => processDescription(dialogue.asset)).join(","));
 
-			console.log({ images }, typeof images);
-			// Run the Python script to generate videos from images
-			const vids = images || await runProcessAndParseJSON('python', ['workflow_api_svd_video.py'], images["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","));
-			const mp4s = { "paths": [] };
-			console.log(vids);
-			const parsedVids = vids["paths"];
-			console.log(parsedVids);
-			// Convert each video to MP4 format
-			// for (let vid of parsedVids) {
-			//     const newVid = `${vid.split(".")[0]}.mp4`;
-			//     console.log(vid);
-			//     await new Promise(res => exec(`magick /Users/safalpandey/projects/personal/ComfyUI/output/${vid} /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
-			//         if (err) {
-			//             console.error("err", err);
-			//         }
-			//         stderr && console.log(stderr);
-			//         stdout && console.log("stdout", stdout);
-			//         mp4s["paths"] = [...mp4s["paths"], newVid];
-			// res();
-			//     }));
-			// }
-			console.log("asd", mp4s);
-			// Resolve the promise with the MP4 paths
-			res(mp4s);
-		}));
-		// Wait for all promises to resolve
-		const [aiImages] = await Promise.all(promises);
-		return aiImages;
-	} else {
-		const images = [];
-		// Loop through each transcript item
-		for (let i = 0; i < length; i++) {
-			// Process the asset description
-			const searchQuery = processDescription(transcript[i].asset);
+		console.log({ images }, typeof images);
+		// Run the Python script to generate videos from images
+		const vids = images || await runProcessAndParseJSON('python', ['workflow_api_svd_video.py'], images["paths"].map(path => `/Users/safalpandey/projects/personal/ComfyUI/output/${path}`).join(","));
+		const mp4s = { "paths": [] };
+		console.log(vids);
+		const parsedVids = vids["paths"];
+		console.log(parsedVids);
+		// Convert each video to MP4 format
+		// for (let vid of parsedVids) {
+		//     const newVid = `${vid.split(".")[0]}.mp4`;
+		//     console.log(vid);
+		//     await new Promise(res => exec(`magick /Users/safalpandey/projects/personal/ComfyUI/output/${vid} /Users/safalpandey/projects/personal/ComfyUI/output/${newVid}`, (err, stdout, stderr) => {
+		//         if (err) {
+		//             console.error("err", err);
+		//         }
+		//         stderr && console.log(stderr);
+		//         stdout && console.log("stdout", stdout);
+		//         mp4s["paths"] = [...mp4s["paths"], newVid];
+		// res();
+		//     }));
+		// }
+		console.log("asd", mp4s);
+		// Resolve the promise with the MP4 paths
+		res(mp4s);
+	});
 
-			// Fetch images from Google Custom Search API
-			const imageFetch = await fetch(
-				`https://www.googleapis.com/customsearch/v1?q=${encodeURI(
-					searchQuery
-				)}&cx=${process.env.GOOGLE_CX}&searchType=image&key=${process.env.GOOGLE_API_KEY
-				}&num=${4}`,
-				{
-					method: 'GET',
-					headers: { 'Content-Type': 'application/json' },
-				}
-			);
-			const imageResponse = await imageFetch.json();
-			// Check if the response contains valid items
-			if (
-				!Array.isArray(imageResponse.items) ||
-				imageResponse.items.length === 0
-			) {
-				console.log(
-					'No images found or items not iterable',
-					imageResponse.items
-				);
-				// Add a placeholder image if no valid images are found
-				images.push({ link: 'https://images.smart.wtf/black.png' });
-				continue;
-			}
-			const validMimeTypes = ['image/png', 'image/jpeg'];
-			let imageAdded = false;
-			// Loop through each image item
-			for (let image of imageResponse.items) {
-				// Check if the image has a valid MIME type
-				if (validMimeTypes.includes(image.mime)) {
-					// Check if the image is viewable
-					const isViewable = await checkImageHeaders(image.link);
-					if (isViewable) {
-						// Add the image to the list
-						images.push(image);
-						imageAdded = true;
-						break;
-					}
-				}
-			}
-			// Add a placeholder image if no valid images are added
-			if (!imageAdded) {
-				images.push({ link: 'https://images.smart.wtf/black.png' });
-			}
-		}
-		// Return the list of images
-		return images;
-	}
+	return aiImages;
 }
 
-async function checkImageHeaders(url) {
-	try {
-		const response = await fetch(url, { method: 'HEAD' });
-		const contentType = response.headers.get('Content-Type');
-		const contentDisposition = response.headers.get('Content-Disposition');
-
-		// Check for direct image content types and absence of attachment disposition
-		if (
-			contentType.includes('image/png') ||
-			contentType.includes('image/jpeg')
-		) {
-			if (!contentDisposition || !contentDisposition.includes('attachment')) {
-				return true; // Image is likely viewable directly in the browser
-			}
-		}
-	} catch (error) {
-		console.error('Error checking image headers:', error);
-	}
-	return false;
-}
-
-const imagePrompt = async (title) => {
-	try {
-		const response = await openai.chat.completions.create({
-			model: VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME || 'gpt-3.5-turbo',
-			messages: [
-				{
-					role: 'user',
-					content: title,
-				},
-			],
-		});
-
-		return response.choices[0]?.message.content;
-	} catch (error) {
-		console.error('Error fetching data:', error);
-	}
-};
-
-const imageGeneneration = async (initialPrompt) => {
+const imageGenenerationWithDallE = async (initialPrompt) => {
 	const prompt = await imagePrompt(initialPrompt);
 	const detailed8BitPreface =
 		'Create an image in a detailed retro 8-bit style. The artwork should have a pixelated texture and should have vibrant coloring and scenery.';
@@ -378,7 +244,7 @@ const imageGeneneration = async (initialPrompt) => {
 	fullPrompt = fullPrompt.substring(0, 900);
 
 	const responseFetch = await openai.images.generate({
-		model: VGEN_IMAGE_GENERATOR_MODEL_NAME || 'dall-e-3',
+		model: 'dall-e-3',
 		prompt: fullPrompt,
 		n: 1,
 		size: '1024x1024',

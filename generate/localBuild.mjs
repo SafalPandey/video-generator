@@ -1,4 +1,4 @@
-import transcribeFunction from './transcribe.mjs';
+import generateVideoContext from './transcribe.mjs';
 import path from 'path';
 import { spawn } from 'child_process';
 import { topics } from './topics.mjs';
@@ -83,13 +83,10 @@ async function main() {
 	// const randomTopic = topics[Math.floor(Math.random() * topics.length)];
 	const promptedTopic = process.argv.slice(2).join(" ");
 
-	// CHANGE THIS VALUE FOR YOUR CHOICE OF AGENTS
+	// CHANGE THIS VALUE FOR YOUR CHOICE OF AGENTS which must be present in the agents array
 	const agentA = getRandomElement(agents);
 	const agentB = getRandomElement(agents.filter(agent => agent !== agentA));
 
-	// CHANGE THIS VALUE FOR A CUSTOM VIDEO TOPIC
-	// const videoTopic = 'Proximal Policy Optimization';
-	const aiGeneratedImages = true;
 	const fps = 60;
 	const duration = 1; //minute
 	//MINECRAFT or TRUCK or GTA
@@ -97,22 +94,19 @@ async function main() {
 	const music = getRandomElement(files.map(file => file.split(".")[0]));
 	const cleanSrt = false;
 
-	const videoTitle = await transcribeFunction(
+	const videoTitle = await generateVideoContext(
 		local,
 		promptedTopic,
 		agentA,
 		agentB,
-		aiGeneratedImages,
 		fps,
-		duration,
 		music,
-		cleanSrt
 	);
 
-	const filename = `${videoTitle.replaceAll("'", "").replaceAll("\"", "").replaceAll(" ", "_")}.mp4`
+	const filename = `${videoTitle.replaceAll(/['\"]/g, "").replaceAll(" ", "_")}.mp4`
 
 	// run in the command line `npm run build`
-	await runProcess(`npm`, [`run`, 'build', `out/${filename}`], "", false)
+	await runProcess(`npm`, [`run`, 'build', `out/${filename}`], "", true)
 	await cleanupResources();
 
 	return filename;
