@@ -6,7 +6,8 @@
 Short for VisualizedGPT.
 
 # History
-I wanted name it Ch**GPT Max first. Then, Siri Max. Have settled with this.
+
+I wanted name it Ch**GPT Max first. Then, Siri Max. I think I even named it JarendraGPT once (long story)! Have settled with this for now.
 You know.... cuz I want to work for them... not the chat agents but the companies. duh! 
  
   # Formerly 1.0
