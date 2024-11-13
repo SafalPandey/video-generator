@@ -8,27 +8,26 @@ const groq = new Groq({
 });
 
 async function generateTitle(transcript) {
-	const completion = await groq.chat.completions.create({
-		messages: [
-			{
-				role: 'system',
-				content: `Create the most catchy title that is sure to go viral based on the transcript!!! Only respond with the best title only one title without any extra info. no quotes single or double`,
-			},
-			{
-				role: 'user',
-				// content: `generate a video about any specific javascript concept/pattern/inbuilt function that is highly useful and mostly unknown and try not to use repetitive topics like reduce and proxy and debounce and symbol. Both the agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial. Also the conversation should be resolved at the end. Make the second person teach the first person about any inbuilt useful function of javascript. Also, always end with a like and subscribe to learn more code message from both!`,
-				content: `Follow system message! Here is the transcript: ${JSON.stringify(transcript)}`,
-			},
-		],
-		model: VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME,
-		temperature: 0.5,
-		max_tokens: 4096,
-		top_p: 1,
-		stop: null,
-		stream: false,
+	const completion = await fetch('http://localhost:11434/api/chat', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			messages: [
+				{
+					role: 'system',
+					content: `Create the most catchy title that is sure to go viral based on the transcript!!! Only respond with the best title only one title without any extra info. no quotes single or double`,
+				},
+				{
+					role: 'user',
+					// content: `generate a video about any specific javascript concept/pattern/inbuilt function that is highly useful and mostly unknown and try not to use repetitive topics like reduce and proxy and debounce and symbol. Both the agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial. Also the conversation should be resolved at the end. Make the second person teach the first person about any inbuilt useful function of javascript. Also, always end with a like and subscribe to learn more code message from both!`,
+					content: `Follow system message! Here is the transcript: ${JSON.stringify(transcript)}`,
+				},
+			],
+			model: VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME || 'llama3.1',
+		}
 	});
 
-	const content = completion.choices[0]?.message?.content || '';
+	const content = await extractResponseText(completion);
 
 	return content;
 }
@@ -69,7 +68,7 @@ function insertVariablesIntoPrompt(topic, agentA, agentB, firstResponse = null) 
 		{
 			role: 'user',
 			// content: `generate a video about any specific javascript concept/pattern/inbuilt function that is highly useful and mostly unknown and try not to use repetitive topics like reduce and proxy and debounce and symbol. Both the agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial. Also the conversation should be resolved at the end. Make the second person teach the first person about any inbuilt useful function of javascript. Also, always end with a like and subscribe to learn more code message from both!`,
-			content: (topic || "generate a video about any specific Impact of A-I in the future of humanity. Current trends in tech companies building robots and more. Make sure they don't repeat the same dialogue.") + ". The agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial but try to focus on the topic as much as possible. Also the conversation should be resolved at the end. Also, always end with a like and subscribe to learn more code message from both! MAKE EACH DIALOGUE AS LONG AS IT MAKES SENSE TO INCREASE THE VIDEO LENGTH OR ADD MORE NEW DIALOGUES TO INCREASE THE LENGTH AS MUCH AS POSSIBLE. REMEMBER TO KEEP THE TOTAL VIDEO AROUND 10 MINUTES!!! FOLLOW EVERY INSTRUCTION IN THE SYSTEM MESSAGE EXACTLY!!! YOUR NUMBER ONE PRIORITY IS TO KEEP THE 'transcript' FIELD EXACTLY 70 ELEMENTS IN LENGTH AND NEVER PUT A ` in any part of your response!!!!!!",
+			content: (topic || "generate a video about any specific Impact of A-I in the future of humanity. Current trends in tech companies building robots and more. Make sure they don't repeat the same dialogue.") + ". The agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial but try to focus on the topic as much as possible. Also the conversation should be resolved at the end. Also, always end with a like and subscribe to learn more code message from both! MAKE EACH DIALOGUE AS LONG AS IT MAKES SENSE TO INCREASE THE VIDEO LENGTH OR ADD MORE NEW DIALOGUES TO INCREASE THE LENGTH AS MUCH AS POSSIBLE. REMEMBER TO KEEP THE TOTAL VIDEO AROUND 10 MINUTES!!! FOLLOW EVERY INSTRUCTION IN THE SYSTEM MESSAGE EXACTLY!!! ONLY AND ONLY RESPOND WITH VALID JSON. To ensure this never write anything before or after the json content",
 		}]
 }
 
@@ -81,8 +80,9 @@ function parseResponse(element) {
 	return element['response']
 }
 
-// write a adder function
-
+async function extractResponseJson(response) {
+	return await JSON.parse(extractResponseText(response))
+}
 
 async function extractResponseText(response) {
 	// Making a valid JSON array of objects from model output
@@ -98,7 +98,8 @@ async function extractResponseText(response) {
 		jsonValue = JSON.parse(rawText);
 	}
 	catch (e) {
-		console.log(rawText, e)
+		console.log('Error while Extracting response text:', rawText)
+		console.error(e);
 		throw e;
 	}
 
@@ -137,10 +138,8 @@ async function generateTranscript(topic, agentA, agentB) {
 			model: VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME || 'llama3.1',
 		})
 	});
+	const content = await extractResponseJson(completion);
 
-
-	const content = await extractResponseText(completion);
-	;
 	return { content };
 	// groq.chat.completions.create({
 	// 	messages: [
@@ -224,11 +223,10 @@ function delay(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export default async function transcriptFunction(
+export default async function getTranscriptAndTitle(
 	topic,
 	agentA,
 	agentB,
-	duration
 ) {
 	let transcript = null;
 	let attempts = 0;
@@ -240,10 +238,10 @@ export default async function transcriptFunction(
 			const content = await generateTranscript(topic, agentA, agentB);
 			// const secondPrompt = insertVariablesIntoPrompt(topic, agentA, agentB, content);
 			// const secondHalfContent = await generateTranscript(secondPrompt);
-			console.log(content.content, typeof content)
+			// console.log(content.content, typeof content)
 			transcript = content === '' ? null : content.content;
 			// transcript.transcript = [...transcript.transcript, JSON.parse(secondHalfContent).transcript]
-			console.log(transcript["transcript"])
+			// console.log(transcript["transcript"])
 
 			// if (transcript.transcript.length < 40) {
 			// 	throw new Error(`thorai bho ${transcript.transcript.length}`)
