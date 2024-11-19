@@ -6,7 +6,7 @@ import { VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME } from './env.mjs';
 const groq = new Groq({
 	apiKey: process.env.GROQ_API_KEY,
 });
-
+<Well formatted valid relevant code content here. always include the output as comment in console log lines include newline characters. Make sure you add a lot of relavant code as much as possible with comments describing them! MAKE SURE THE MAX WIDTH OF THE CODE IS 46 CHARACTERS INCLUDING WHITESPACE CHARACTERS SO BREAK LINE OR WHATEVER BEFORE THE CHARACTERS OVERFLOW!!! NEVER USE BACKTICKS \"\`\" INSIDE THE CODE CONTENT!\`,'asset': 'relevant image generate query based on the current line. NO TINY AND LONG TEXTS! ONLY LARGE AND SHORT TEXTS ALLOWED IF NEEDED. NO LOGOS. NO TEXT. NO CHARTS GRAPHICS. TRY TO DESCRIBE A SCENE OR AN OBJECT!!! Always describe realistic images! try to keep the background attractive like a green scenary or a city scape background no texts involved!'
 async function generateTitle(transcript) {
 	const completion = await fetch('http://localhost:11434/api/chat', {
 		method: 'POST',
@@ -114,28 +114,46 @@ async function generateTranscript(topic, agentA, agentB) {
 			'Content-Type': 'application/x-www-form-urlencoded'
 		},
 		body: JSON.stringify({
-			messages: [{
-				role: 'system',
-				content: `Create a dialogue for a short-form conversation. The conversation should be between two agents, ${agentA.replace(
-					'_',
-					' '
-				)} and ${agentB.replace("_", " ")}, each with their unique mannerisms and speech patterns. ${agentA.replace(
-					'_',
-					' '
-				)} should engage with the topic with a sense of curiosity and a desire for practical understanding, while ${agentB.replace(
-					'_',
-					' '
-				)} offers a deep, analytical perspective. The dialogue should be engaging and include light humor, yet still provide meaningful insights into the topic. Try aiming for a concise transcript that MUST only be LESS THAN 40 SECONDS. The person attribute should either be ${agentA} or ${agentB}. The line attribute should be that character's line of dialogue. I also need an asset description under the asset attribute which would be a relevant search query to find an image which should be relevant to the overall topic of the conversation. The asset descriptions shouldn't be vague, but a description of something that you think would be a good image to go along with the conversation. Specificity is key. The JSON format WHICH MUST BE ADHERED TO ALWAYS!!! IT MUST ONLY HAVE 5 ELEMENTS AT MOST INSIDE THE 'transcript' ARRAY. DO NOT ADD ANY EXTRA TEXT THAT MIGHT BREAK THE JSON FORMAT DESCRIBED IN THIS SYSTEM PROMPT!!! ONLY FOLLOW {"transcript": {[<content here>]}}! DO NOT START WITH "HERE IS A SCRIPT" OR ANY NON-JSON TEXT IN YOUR RESPONSE! YOUR ENTIRE RESPONSE MUST BE A VALID JSON! MAKE SURE ANY QUOTES ARE ESCAPED PROPERLY! USE DOUBLE QUOTES TO DEFINE JSON PROPERTIES AND VALUES FOR JSON. THE FORMAT is as follows:
-				{ transcript: { [ {'person': 'the exact value of ${agentA} or ${agentB} depending on who is talking', 'line': 'their line of conversation in the dialog. important to note that if they are mentioning any code specifics even like the words javascript or HTML or python make sure it is spelled properly in the line attribute! For example: write api as A-P-I to ensure they pronounce the letters correctly!', 'code': \`Well formatted valid relevant code content here. always include the output as comment in console log lines include newline characters. Make sure you add a lot of relavant code as much as possible with comments describing them! MAKE SURE THE MAX WIDTH OF THE CODE IS 46 CHARACTERS INCLUDING WHITESPACE CHARACTERS SO BREAK LINE OR WHATEVER BEFORE THE CHARACTERS OVERFLOW!!! NEVER USE BACKTICKS \"\`\" INSIDE THE CODE CONTENT!\`,'asset': 'relevant image generate query based on the current line. NEVER DRAW ANY SCREENSHOTS!!! NO LONG SMALL TEXTS! ONLY LARGE SHORT TEXTS ALLOWED IF NEEDED. NO LOGOS. NO TEXT. NO CHARTS GRAPHICS. TRY TO DESCRIBE A SCENE OR AN OBJECT!!! Always describe realistic images! try to keep the background attractive like a green scenary or a city scape background no texts involved!'} ] } }
-							 `,
-			},
-			{
-				role: 'user',
-				// content: `generate a video about any specific javascript concept/pattern/inbuilt function that is highly useful and mostly unknown and try not to use repetitive topics like reduce and proxy and debounce and symbol. Both the agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial. Also the conversation should be resolved at the end. Make the second person teach the first person about any inbuilt useful function of javascript. Also, always end with a like and subscribe to learn more code message from both!`,
-				content: (topic || "generate a video about any specific Impact of A-I in the future of humanity. Current trends in tech companies building robots and more. Make sure they don't repeat the same dialogue.") + ". The agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial but try to focus on the topic as much as possible. Also the conversation should be resolved at the end. Also, always end with a like and subscribe to learn more code message from both! YOU MUST KEEP THE TOTAL TRANSCRIPT AUDIO TO BE UNDER 45 SECONDS ONLY!!! FOLLOW EVERY INSTRUCTION IN THE SYSTEM MESSAGE EXACTLY!!!!!",
-			},
+			messages: [
+
+				// {
+				// 	role: 'system',
+				// 	content: `
+				// Create a dialogue for a short-form conversation. The conversation should be between two agents, ${agentA.replace(
+				// 		'_',
+				// 		' '
+				// 	)} and ${agentB.replace("_", " ")}, each with their unique mannerisms and speech patterns. ${agentA.replace(
+				// 		'_',
+				// 		' '
+				// 	)} should engage with the topic with a sense of curiosity and a desire for practical understanding, while ${agentB.replace(
+				// 		'_',
+				// 		' '
+				// 	)} offers a deep, analytical perspective. The dialogue should be engaging and include light humor, yet still provide meaningful insights into the topic. Try aiming for a concise transcript that MUST only be LESS THAN 40 SECONDS. The person attribute should either be ${agentA} or ${agentB}. The line attribute should be that character's line of dialogue. I also need an asset description under the asset attribute which would be a relevant search query to find an image which should be relevant to the overall topic of the conversation. The asset descriptions shouldn't be vague, but a description of something that you think would be a good image to go along with the conversation. Specificity is key. The JSON format WHICH MUST BE ADHERED TO ALWAYS!!! IT MUST ONLY HAVE 5 ELEMENTS AT MOST INSIDE THE 'transcript' ARRAY. DO NOT ADD ANY EXTRA TEXT THAT MIGHT BREAK THE JSON FORMAT DESCRIBED IN THIS SYSTEM PROMPT!!! ONLY FOLLOW {"transcript": {[<content here>]}}! DO NOT START WITH "HERE IS A SCRIPT" OR ANY NON-JSON TEXT IN YOUR RESPONSE! YOUR ENTIRE RESPONSE MUST BE A VALID JSON! MAKE SURE ANY QUOTES ARE ESCAPED PROPERLY! USE DOUBLE QUOTES TO DEFINE JSON PROPERTIES AND VALUES FOR JSON. THE FORMAT is as follows:
+				
+				// { transcript: { [ {'person': 'the exact value of ${agentA} or ${agentB} depending on who is talking', 'line': 'their line of conversation in the dialog. important to note that if they are mentioning any code specifics even like the words javascript or HTML or python make sure it is spelled properly in the line attribute! For example: write api as A-P-I to ensure they pronounce the letters correctly!', 'code': \`Well formatted valid relevant code content here. always include the output as comment in console log lines include newline characters. Make sure you add a lot of relavant code as much as possible with comments describing them! MAKE SURE THE MAX WIDTH OF THE CODE IS 46 CHARACTERS INCLUDING WHITESPACE CHARACTERS SO BREAK LINE OR WHATEVER BEFORE THE CHARACTERS OVERFLOW!!! NEVER USE BACKTICKS \"\`\" INSIDE THE CODE CONTENT!\`,'asset': 'relevant image generate query based on the current line. NEVER DRAW ANY SCREENSHOTS!!! NO LONG SMALL TEXTS! ONLY LARGE SHORT TEXTS ALLOWED IF NEEDED. NO LOGOS. NO TEXT. NO CHARTS GRAPHICS. TRY TO DESCRIBE A SCENE OR AN OBJECT!!! Always describe realistic images! try to keep the background attractive like a green scenary or a city scape background no texts involved!'} ] } }
+				// `,
+				// },
+				{
+					role: 'system',
+					content: `
+						Create a monologue using interesting Darth Vader mannerisms that will fulfill the following json format when tested! 
+					 	{ transcript: {
+							[
+							{
+								'person': '<the exact value of DARTH_VADER>',
+								'line': '<their line of conversation in the dialog. important to note that if they are mentioning any code specifics even like the words javascript or HTML or python make sure it is spelled properly in the line attribute! For example: write api as A-P-I to ensure they pronounce the letters correctly!',
+								'code': '<${CODE_DESCRIPTION}>'} ] } }
+				`
+					 },
+				{
+					role: 'user',
+					// content: `generate a video about any specific javascript concept/pattern/inbuilt function that is highly useful and mostly unknown and try not to use repetitive topics like reduce and proxy and debounce and symbol. Both the agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial. Also the conversation should be resolved at the end. Make the second person teach the first person about any inbuilt useful function of javascript. Also, always end with a like and subscribe to learn more code message from both!`,
+					content: (topic || "generate a video about any specific Impact of A-I in the future of humanity. Current trends in tech companies building robots and more. Make sure they don't repeat the same dialogue.") + ". The agents should talk about it in a way they would normally, but extremify their qualities and make the conversation risque if either agents are controversial but try to focus on the topic as much as possible. Also the conversation should be resolved at the end. Also, always end with a like and subscribe to learn more code message from both! YOU MUST KEEP THE TOTAL TRANSCRIPT AUDIO TO BE UNDER 45 SECONDS ONLY!!! FOLLOW EVERY INSTRUCTION IN THE SYSTEM MESSAGE EXACTLY!!!!!",
+				},
 			],
-			model: VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME || 'llama3.1',
+			model:
+				// VGEN_TRANSCRIPT_GENERATOR_MODEL_NAME || 
+				'llama3.2',
 		})
 	});
 	const content = await extractResponseJson(completion);
